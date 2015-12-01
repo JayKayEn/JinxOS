@@ -3,8 +3,8 @@
 
 void init_pit(void);
 
-uint32_t ticks(void);
-void timer(uint32_t ticks);
-void pit_rate(double hz);
+uint32_t pit_ticks(void);
+void pit_timer(uint32_t ticks);
+void pit_calibrate(double hz);
 
 #endif // _PIT_H_

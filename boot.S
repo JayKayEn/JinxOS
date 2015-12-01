@@ -1,106 +1,104 @@
-#include <memlayout.h>
-#include <mmu.h>
+    .set K_CS,      0x08           # kernel code segment selector
+    .set K_DS,      0x10           # kernel data segment selector
+    .set CR0_PE,    0x1            # protected mode enable flag
+    .set SMAP,      0x534d4150     # "SMAP"
+    .set MB_PA,     0x9000         # Multiboot info physical address
 
-# Start the CPU: switch to 32-bit protected mode, jump into C.
-# The BIOS loads this code from the first sector of the hard disk into
-# memory at physical address 0x7c00 and starts executing in real mode
-# with %cs=0 %ip=7c00.
-
-.set PROT_MODE_CSEG, 0x8            # kernel code segment selector
-.set PROT_MODE_DSEG, 0x10           # kernel data segment selector
-.set CR0_PE_ON,      0x1            # protected mode enable flag
-
-.code16                     # Assemble for 16-bit mode
-.globl start
+    .code16
+    .globl start
 start:
-    cli                 # Disable interrupts
-    cld                 # String operations increment
+    cli
+    cld
 
-    # Set up the important data segment registers (DS, ES, SS).
-    xorw    %ax, %ax            # Segment number zero
-    movw    %ax, %ds            # -> Data Segment
-    movw    %ax, %es            # -> Extra Segment
-    movw    %ax, %ss            # -> Stack Segment
+    xorw    %ax, %ax
+    movw    %ax, %ds
+    movw    %ax, %es
+    movw    %ax, %ss
 
-    # Enable A20:
-    #   For backwards compatibility with the earliest PCs, physical
-    #   address line 20 is tied low, so that addresses higher than
-    #   1MB wrap around to zero by default.  This code undoes this.
-seta20.1:
+# A20:
+    jmp a20
+wait:
     inb     $0x64, %al          # Wait for not busy
     testb   $0x2, %al
-    jnz     seta20.1
-
+    jnz     wait
+    ret
+a20:
+    call    wait
     movb    $0xD1, %al          # 0xd1 -> port 0x64
     outb    %al, $0x64
-
-seta20.2:
-    inb     $0x64, %al          # Wait for not busy
-    testb   $0x2, %al
-    jnz     seta20.2
-
+    call    wait
     movb    $0xDF, %al          # 0xdf -> port 0x60
     outb    %al, $0x60
 
-    # Copy the E820 memory map to MULTIBOOT_PADDR.
-e820_start:
-    #xorl    %ebx, %ebx          # clear ebx
-    movw    $MULTIBOOT_PADDR, %di
-e820_loop:
-    movl    $0x20, (%di)        # Request 32 bytes
+# E820:
+e820:
+    xorl    %ebx, %ebx          # clear ebx
+    movw    $MB_PA, %di
+e820.loop:
+    movl    $0x14, (%di)        # Request 32 bytes
     addw    $0x4, %di             # bump to payload
-    movl    $0x534d4150, %edx   # "SMAP"
+    movl    $SMAP, %edx         # "SMAP"
     movl    $0xE820, %eax
     movw    $0x20, %cx          # ignore ACPI 3.0 extended attributes
     int     $0x15
-    jc      e820_end            # none?
+    jc      e820.end            # none?
     cmpw    $0x14, %cx
-    jg      e820_skip           # entry should have at least 20 byte
-    addw    $0x20, %di            # continue to next entry
-e820_skip:
+    jg      e820.skip           # entry should have at least 20 byte
+    addw    $0x14, %di            # continue to next entry
+e820.skip:
     test    %ebx, %ebx
-    jne     e820_loop           # done if ebx = 0
-e820_end:
-    mov     %edi, (mbi)         # store end pointer to mbi
+    jne     e820.loop           # done if ebx = 0
+e820.end:
+    mov     %edi, mbi         # store end pointer to mbi
 
-    # Switch from real to protected mode, using a bootstrap GDT
-    # and segment translation that makes virtual addresses
-    # identical to their physical addresses, so that the
-    # effective memory map does not change during the switch.
+# Enable Paging
     lgdt    gdtdesc
     movl    %cr0, %eax
-    orl     $CR0_PE_ON, %eax
+    orl     $CR0_PE, %eax
     movl    %eax, %cr0
 
-    # Set up the protected-mode data segment registers
-    movw    $PROT_MODE_DSEG, %ax        # Our data segment selector
-    movw    %ax, %ds            # -> DS: Data Segment
-    movw    %ax, %es            # -> ES: Extra Segment
-    movw    %ax, %fs            # -> FS
-    movw    %ax, %gs            # -> GS
-    movw    %ax, %ss            # -> SS: Stack Segment
+    movw    $K_DS, %ax
+    movw    %ax, %ds
+    movw    %ax, %es
+    movw    %ax, %fs
+    movw    %ax, %gs
+    movw    %ax, %ss
 
-    # Jump to next instruction, but in 32-bit code segment.
-    # Switches processor into 32-bit mode.
-    ljmp    $PROT_MODE_CSEG, $protcseg
+    ljmp    $K_CS, $protected
 
-.code32                     # Assemble for 32-bit mode
-protcseg:
-    # Set up the stack pointer and call into C.
+    .code32
+protected:
     movl    $start, %esp
     call    bmain
-
-    # If bmain returns (it shouldn't), loop.
 spin:
-    jmp spin
+    jmp     spin
+    hlt
 
-# Bootstrap GDT
-.p2align 2                  # force 4 byte alignment
+# puts:
+#     pusha
+#     movb    $0x0E, %ah
+# puts.loop:
+#     lodsb
+#     cmp     $0x00, %al
+#     je      puts.2
+#     int     $0x10
+#     jmp     puts.1
+# puts.end:
+#     popa
+#     ret
+
+# start_msg:
+#     .ascii  "Start the jinx bootloader ...\r\n\0"
+# error_msg:
+#     .ascii  "Error: failed to load\r\n\0"
+
+# Boot GDT
+    .align 4
 gdt:
-    SEG_NULL                # null seg
-    SEG(STA_X|STA_R, 0x0, 0xffffffff)   # code seg
-    SEG(STA_W, 0, 0xffffffff)       # data seg
-
+    .quad 0
+    .quad 0x00CF9A000000FFFF        # kernel CS
+    .quad 0x00CF92000000FFFF        # kernel DS
+gdtend:
 gdtdesc:
-    .word   0x17                # sizeof(gdt) - 1
-    .long   gdt             # address gdt
+    .word   gdtend - gdt
+    .long   gdt

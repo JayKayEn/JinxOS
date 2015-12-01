@@ -7,23 +7,23 @@
 #define TBL_NBITS   10
 #define TBL_SIZE    (1 << TBL_NBITS)
 
-size_t pd[TBL_SIZE];
-size_t pt[TBL_SIZE];
+// size_t pd[TBL_SIZE];
+// size_t pt[TBL_SIZE];
 
 #define PG_IDX(a)   (((size_t) a & 0xFFF)
 
-#define PT_SHIFT   (PG_NBITS)  // 12
+#define PT_SHIFT   (PG_NBITS)
 #define PT_IDX(a)  (((size_t) a >> PT_SHIFT) & 0x3FF)
 
-#define PD_SHIFT   (TBL_NBITS + PG_NBITS)  // 22
+#define PD_SHIFT   (TBL_NBITS + PG_NBITS)
 #define PD_IDX(a)  (((size_t) a >> PD_SHIFT) & 0x3FF)
 
-#define PG_P   BIT(0)   // Present
-#define PG_W   BIT(1)   // Writeable
-#define PG_U   BIT(2)   // User
-#define PG_A   BIT(5)   // Accessed
-#define PG_D   BIT(6)   // Dirty
-#define PG_PS  BIT(7)   // Page Size
+#define PG_P     BIT(0)   // Present
+#define PG_W     BIT(1)   // Writeable
+#define PG_U     BIT(2)   // User
+#define PG_A     BIT(5)   // Accessed
+#define PG_D     BIT(6)   // Dirty
+#define PG_PS    BIT(7)   // Page Size
 
 #define CR0_PE   BIT(0)   // Protection Enable
 #define CR0_MP   BIT(1)   // Monitor coProcessor

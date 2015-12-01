@@ -3,10 +3,31 @@
 #include <pit.h>
 #include <x86.h>
 
-volatile uint32_t nticks = 0;
+#define PIT_DEFAULT 18.22222222
 
-uint32_t ticks(void) {
+static volatile uint32_t nticks;
+
+uint32_t pit_ticks(void) {
     return nticks;
+}
+
+void pit_timer(uint32_t ticks) {
+    uint32_t eticks = nticks + ticks;
+    while(nticks != eticks);
+}
+
+void pit_reset(void) {
+    nticks = 0;
+}
+
+void pit_calibrate(double hz) {
+    uint16_t interval = 1193180 / hz;
+
+    outb(0x43, 0x36);
+    outb(0x40, interval & 0xFF);
+    outb(0x40, interval >> 8);
+
+    pit_reset();
 }
 
 void iqr_handler_pit(struct regs* r) {
@@ -15,20 +36,7 @@ void iqr_handler_pit(struct regs* r) {
     ++nticks;
 }
 
-void timer(uint32_t ticks) {
-    uint32_t eticks = nticks + ticks;
-    while(nticks != eticks);
-}
-
-void pit_rate(double hz) {
-    uint16_t interval = 1193180 / hz;
-
-    outb(0x43, 0x36);
-    outb(0x40, interval & 0xFF);
-    outb(0x40, interval >> 8);
-}
-
 void init_pit(void) {
-    pit_rate(18.22222222);
+    pit_calibrate(PIT_DEFAULT);
     irq_install_handler(IRQ_TIMER, iqr_handler_pit);
 }

@@ -11,7 +11,7 @@
 #define GD_KD     0x10     // kernel data
 #define GD_UT     0x18     // user text
 #define GD_UD     0x20     // user data
-#define GD_TSS0   0x28     // Task segment selector for CPU 0
+#define GD_TS0    0x28     // Task segment selector for CPU 0
 
 /*
  * Virtual memory map:                                Permissions
@@ -136,12 +136,12 @@
 // // Physical address of startup code for non-boot CPUs (APs)
 // #define MPENTRY_PADDR	0x7000
 
-#define MULTIBOOT_PADDR	0x9000
+// #define MULTIBOOT_PADDR	0x9000
 
 #ifndef __ASSEMBLER__
 
-typedef uint32_t pte_t;
-typedef uint32_t pde_t;
+// typedef uint32_t pte_t;
+// typedef uint32_t pde_t;
 
 // #if JOS_USER
 // /*

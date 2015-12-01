@@ -13,14 +13,12 @@ struct multiboot_info* mbi;
 void
 bmain(void) {
     struct elf* elf = (struct elf*) ELFHDR;
-    // read 1st page off disk
+
     readseg((uint32_t) elf, SECTSIZE * 8, 0);
 
-    // is this a valid ELF?
     if (elf->magic != ELF_MAGIC)
         goto bad;
 
-    // load each program segment (ignores p flags)
     struct prog* p = (struct prog*)((uint8_t*) elf + elf->poffset);
     struct prog* ep = p + elf->nprogs;
     for (; p < ep; p++)

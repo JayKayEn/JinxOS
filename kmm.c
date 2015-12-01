@@ -3,7 +3,7 @@
 #include <err.h>
 
 #define KHEAP_MIN 0x10000
-#define KHEAP_MAX 0x80000
+#define KHEAP_MAX 0x9FC00
 
 static size_t kbrk;
 

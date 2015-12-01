@@ -11,6 +11,7 @@
 #include <pit.h>
 
 int cmd_help(int argc, char* argv[]);
+int cmd_info(int argc, char* argv[]);
 int cmd_clear(int argc, char* argv[]);
 int cmd_e820(int argc, char* argv[]);
 int cmd_meminfo(int argc, char* argv[]);
@@ -25,6 +26,8 @@ static const struct cmd {
 } cmds[] = {
     { "help", "    Display this list of commands",
             cmd_help },
+    { "info", "    Display kernel info",
+            cmd_info },
     { "clear", "   Clear the console of text",
             cmd_clear },
     { "e820", "    Display the E820h memory map",
@@ -48,6 +51,13 @@ cmd_help(int argc, char* argv[]) {
     size_t i;
     for (i = 0; i < ARRAY_SIZE(cmds); i++)
         print("\t%s  %s\n", cmds[i].name, cmds[i].desc);
+    return 0;
+}
+
+int cmd_info(int argc, char* argv[]) {
+    (void) argc; (void) argv;
+
+    print("\tCompiled at %s %s\n", __DATE__, __TIME__);
     return 0;
 }
 
@@ -111,7 +121,7 @@ int
 cmd_ticks(int argc, char* argv[]) {
     (void) argc; (void) argv;
 
-    print("%lu\n", ticks());
+    print("%lu\n", pit_ticks());
     return 0;
 }
 

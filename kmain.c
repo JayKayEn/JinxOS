@@ -1,8 +1,8 @@
 #include <lib.h>
 #include <spinlock.h>
 #include <multiboot.h>
-#include <mmu.h>
-#include <memlayout.h>
+// #include <mmu.h>
+// #include <memlayout.h>
 #include <console.h>
 #include <x86.h>
 #include <init.h>
@@ -10,6 +10,7 @@
 #include <pit.h>
 #include <kmm.h>
 #include <cga.h>
+#include <vmm.h>
 
 #define demand(exp)                                         \
     do {                                                    \
@@ -18,8 +19,8 @@
     } while(0)
 
 __attribute__((aligned(BIT(12))))
-pde_t bpgd[NPDENTRIES] = {
-    [0] = PTE_P | PTE_W | PTE_PS,
+size_t bpgd[TBL_SIZE] = {
+    [0] = PG_P | PG_W | PG_PS,
 };
 
 static void jinx() {
@@ -31,7 +32,7 @@ static void jinx() {
         "\t\t  _/_/    _/  _/    _/  _/    _/           _/_/    _/_/_/      \n",
     };
 
-    print("\n\n");
+    print("\n");
     for (int i = 0; i < 5; ++i) {
         int j;
         int k = 0;
@@ -47,7 +48,6 @@ static void jinx() {
             putc(title[i][k]);
         putc('\n');
     }
-    print("\n");
     settextcolor(0x0F00);
 }
 
@@ -72,13 +72,12 @@ void kmain(uint32_t eax, size_t ebx) {
     init_kmm();
     init_pmm();
 
+    sti();              // enable interrupts
+    hlt();              // ensure interrupts are enabled
+
     lock_kernel();
 
     jinx();
 
-    sti();              // enable interrupts
-    hlt();              // ensure interrupts are enabled
-
-    for (;;)
-        prompt();
+    prompt();
 }

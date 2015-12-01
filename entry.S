@@ -1,18 +1,29 @@
-#include <multiboot.h>
-#include <mmu.h>
-#include <memlayout.h>
+#define BIT(n)   (1 << n)
 
-.text
+#define CR0_PE      BIT(0)   // Protection Enabled
+#define CR0_WP      BIT(16)  // Write Protect
+#define CR0_PG      BIT(31)  // Paging Enabled
 
-.align 4
-.long 0x1BADB002                    // MULTIBOOT_HEADER_MAGIC
-.long 0x00000002                    // MULTIBOOT_HEADER_FLAGS
-.long -(0x1BADB002 + 0x00000002)    // CHECKSUM
+#define CR4_PSE     BIT(4)   // Page Size Extensions
 
-.globl _start
+#define PG_SIZE     BIT(12)  // Align to 4KB
+#define STK_SIZE    BIT(15)  // 32KB = pow(2, 15) = 8 * 4KB
+
+    .set MBOOT_HEADER,  0x1BADB002
+    .set MBOOT_FLAGS,   0x00000002
+    .set CHECHSUM,      -(MBOOT_HEADER + MBOOT_FLAGS)
+
+    .text
+
+    .align  4
+    .long   MBOOT_HEADER
+    .long   MBOOT_FLAGS
+    .long   CHECHSUM
+
+    .globl _start
 _start = _entry
 _entry:
-    movw    $0x1234, 0x472
+    movw    $0x1234, 0x0472
 
     movl    $bpgd, %ecx
     movl    %ecx, %cr3
@@ -38,12 +49,9 @@ vm:
 spin:
     jmp spin
 
-.data
-.align      (1 << 12)       // 4KB = pow(2, 12)
-
-.globl      bstack
+    .data
+    .align  PG_SIZE
+    .globl  bstack
 bstack:
-.space      (1 << 12 << 3)  // 32KB = 8 * 4KB
-
-.globl      ebstack
+    .space  STK_SIZE
 ebstack:

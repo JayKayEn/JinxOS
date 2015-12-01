@@ -48,8 +48,7 @@ int
 cmd_help(int argc, char* argv[]) {
     (void) argc; (void) argv;
 
-    size_t i;
-    for (i = 0; i < ARRAY_SIZE(cmds); i++)
+    for (size_t i = 0; i < ARRAY_SIZE(cmds); i++)
         print("\t%s  %s\n", cmds[i].name, cmds[i].desc);
     return 0;
 }
@@ -57,7 +56,7 @@ cmd_help(int argc, char* argv[]) {
 int cmd_info(int argc, char* argv[]) {
     (void) argc; (void) argv;
 
-    print("\tCompiled at %s %s\n", __DATE__, __TIME__);
+    print("\tCompiled on %s at %s\n", __DATE__, __TIME__);
     return 0;
 }
 
@@ -216,9 +215,8 @@ runcmd(char* buf) {
     if (argc == 0)
         return 0;
 
-    size_t i;
     static const size_t ncmds = ARRAY_SIZE(cmds);
-    for (i = 0; i < ncmds; i++)
+    for (size_t i = 0; i < ncmds; i++)
         if (strcmp(argv[0], cmds[i].name) == 0)
             return cmds[i].func(argc, argv);
 

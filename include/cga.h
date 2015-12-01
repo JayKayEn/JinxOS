@@ -21,13 +21,26 @@
 //    6     BROWN         E     LIGHT BROWN
 //    7     LIGHT GREY    F     WHITE
 
+// Default: Light Grey
+#define VGA_NORMAL      0x0F00
+
+// Light colors
 #define VGA_BLUE        0x0900
 #define VGA_GREEN       0x0A00
 #define VGA_CYAN        0x0B00
 #define VGA_RED         0x0C00
 #define VGA_MAGENTA     0x0D00
 #define VGA_BROWN       0x0E00
-#define VGA_NORMAL      0x0F00
+#define VGA_GREY        0x0700
+
+// Dark colors
+#define VGA_DBLUE       0x0100
+#define VGA_DGREEN      0x0200
+#define VGA_DCYAN       0x0300
+#define VGA_DRED        0x0400
+#define VGA_DMAGENTA    0x0500
+#define VGA_DBROWN      0x0600
+#define VGA_DGREY       0x0800
 
 struct crt {
     uint16_t* buf;

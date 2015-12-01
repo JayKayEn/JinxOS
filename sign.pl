@@ -8,11 +8,11 @@ read(BB, $buf, 1000);
 $n = length($buf);
 
 if($n > 510){
-	print STDERR "boot block too large: $n bytes (max 510)\n";
+	print STDERR " <!> boot block too large: $n bytes (max 510)\n";
 	exit 1;
 }
 
-print STDERR "boot block is $n bytes (max 510)\n";
+print STDERR " <i> boot block is $n bytes (max 510)\n";
 
 $buf .= "\0" x (510-$n);
 $buf .= "\x55\xAA";

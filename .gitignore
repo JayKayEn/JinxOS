@@ -4,10 +4,11 @@
 *.o
 ._*
 
-.gdbinit
-libgcc.a
-_devtests
-obj
-boot
-kernel
-jinx
+/.gdbinit
+/libgcc.a
+/obj/
+/boot
+/kernel
+/jinx
+/_devtests/
+/tests/

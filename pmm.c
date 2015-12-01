@@ -10,9 +10,8 @@ static const size_t pages;
 void init_pmm(void) {
     size_t mem = 0;
 
-    size_t i;
-    struct e820_e* e;
-    for (i = 0, e = e820_map.entries; i != e820_map.size; ++i, ++e)
+    struct e820_e* e = e820_map.entries;
+    for (size_t i = 0; i != e820_map.size; ++i, ++e)
         mem = MAX(mem, (size_t)(e->addr + e->len));
 
     size_t pages = mem >> PG_NBITS;
@@ -20,7 +19,7 @@ void init_pmm(void) {
 
     extern char _end[];
     size_t endpg = (size_t) _end >> 12;
-    for (i = 0; i < endpg; ++i)
+    for (size_t i = 0; i < endpg; ++i)
         kbitmap_mark(physmap, i);
 }
 

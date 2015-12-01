@@ -44,16 +44,13 @@ bad:
 void
 readseg(uint32_t pa, uint32_t count, uint32_t offset) {
 
-    uint32_t end_pa = pa + count;
+    uint32_t end = pa + count;
 
     pa &= ~(SECTSIZE - 1);
     offset = (offset / SECTSIZE) + 1;
 
-    while (pa < end_pa) {
+    for (; pa < end; pa += SECTSIZE, ++offset)
         readsect((uint8_t*) pa, offset);
-        pa += SECTSIZE;
-        offset++;
-    }
 }
 
 void

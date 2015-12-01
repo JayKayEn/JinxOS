@@ -18,7 +18,7 @@ void
 print_e820_mmap(void) {
     print("\tE820: memory map [mem 0x%08x-0x%08x]\n", mbi->mmap_addr,
             mbi->mmap_addr + mbi->mmap_length - 1);
-    // size_t i;
+
     for (size_t i = 0; i < e820_map.size; ++i) {
         struct e820_e e820 = e820_map.entries[i];
         print("\t\t[ %08p - %08p ] ", (size_t) e820.addr,
@@ -59,7 +59,7 @@ init_e820(size_t mbi_addr) {
     for (i = 0; mmap_addr < mmap_end; ++i) {
         struct multiboot_mmap_entry* e = (struct multiboot_mmap_entry*) mmap_addr;
         e820_map.entries[i] = e->e820;
-        mmap_addr += (e->size + 4);
+        mmap_addr += e->size + 4;
     }
     assert(i < E820_MAX_SIZE);
     e820_map.size = i;

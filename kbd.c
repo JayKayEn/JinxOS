@@ -3,17 +3,17 @@
 #include <int.h>
 #include <console.h>
 
-#define NO          (0 << 0)
+#define NO          0
 
-#define SHIFT       (1 << 0)
-#define CTL         (1 << 1)
-#define ALT         (1 << 2)
+#define SHIFT       BIT(0)
+#define CTL         BIT(1)
+#define ALT         BIT(2)
 
-#define CAPSLOCK    (1 << 3)
-#define NUMLOCK     (1 << 4)
-#define SCROLLLOCK  (1 << 5)
+#define CAPSLOCK    BIT(3)
+#define NUMLOCK     BIT(4)
+#define SCROLLLOCK  BIT(5)
 
-#define ESC         (1 << 6)
+#define ESC         BIT(6)
 
 #define KEY_HOME    0xE0
 #define KEY_END     0xE1

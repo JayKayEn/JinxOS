@@ -23,8 +23,7 @@ static size_t addr_6845;
 void scroll(void) {
     memcpy(crt.buf, crt.buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
 
-    int i;
-    for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; ++i)
+    for (int i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; ++i)
         crt.buf[i] = attrib | ' ';
 
     crt.pos -= CRT_COLS;
@@ -42,8 +41,7 @@ void update_cursor(void) {
 void cls() {
     unsigned blank = attrib | ' ';
 
-    int i;
-    for(i = 0; i < CRT_SIZE; ++i)
+    for(int i = 0; i < CRT_SIZE; ++i)
         memsetw(crt.buf, blank, CRT_SIZE);
 
     crt.pos = 0;
@@ -61,7 +59,7 @@ void putc_cga(const char c) {
             break;
         case '\n':
             crt.pos += CRT_COLS;
-        /* fallthru */
+            // fallthru
         case '\r':
             crt.pos -= (crt.pos % CRT_COLS);
             break;

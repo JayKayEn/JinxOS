@@ -2,11 +2,11 @@
 
 size_t
 strlen(const char* str) {
-    size_t retval;
-    for(retval = 0; *str != '\0'; ++str)
-        retval++;
+    size_t len;
+    for(len = 0; *str != '\0'; ++str)
+        len++;
 
-    return retval;
+    return len;
 }
 
 char*
@@ -20,9 +20,7 @@ strchr(const char* s, char c) {
 
 char*
 strstr(const char* str, const char* sub) {
-    char *a, *b;
-
-    b = (char*) sub;
+    char* b = (char*) sub;
     if (*b == 0)
         return (char*) str;
 
@@ -30,7 +28,7 @@ strstr(const char* str, const char* sub) {
         if (*str != *b)
             continue;
 
-        a = (char*) str;
+        char* a = (char*) str;
         while (1) {
             if (*b == 0)
                 return (char*) str;
@@ -44,9 +42,9 @@ strstr(const char* str, const char* sub) {
 
 int
 strcmp(const char* s1, const char* s2) {
-    for ( ; *s1 == *s2; ++s1, ++s2)
-    if (*s1 == '\0')
-        return 0;
+    for (; *s1 == *s2; ++s1, ++s2)
+        if (*s1 == '\0')
+            return 0;
 
     return ((*(unsigned char*) s1 < *(unsigned char*) s2) ? -1 : +1);
 }

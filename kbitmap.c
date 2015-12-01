@@ -13,9 +13,8 @@ struct kbitmap {
 struct kbitmap *
 kbitmap_create(uint32_t bits) {
     struct kbitmap* b = kalloc(sizeof(struct kbitmap));
-    if (b == NULL) {
+    if (b == NULL)
         return NULL;
-    }
 
     uint32_t bytes = DIVROUNDUP(bits, 8);
     b->bytes = kalloc(bytes * sizeof(uint8_t));
@@ -29,15 +28,14 @@ kbitmap_create(uint32_t bits) {
 
     // Mark any leftover bits at the end in use
     if (bytes > bits >> 3) {
-        uint32_t j, i = bytes - 1;
-        uint32_t overbits = bits - (i << 3);
+        uint32_t i = bytes - 1;
+        assert(bits >> 3 == i);
 
-        assert(bits >> 3 == bytes - 1);
+        uint32_t overbits = bits - (i << 3);
         assert(overbits > 0 && overbits < 8);
 
-        for (j = overbits; j < 8; ++j) {
+        for (uint32_t j = overbits; j < 8; ++j)
             b->bytes[i] |= (uint8_t) 1 << j;
-        }
     }
 
     return b;
@@ -45,13 +43,11 @@ kbitmap_create(uint32_t bits) {
 
 int
 kbitmap_alloc(struct kbitmap* b, uint32_t* index) {
-    uint32_t i;
     uint32_t max = DIVROUNDUP(b->bits, 8);
-    for (i = 0; i < max; ++i) {
+    for (uint32_t i = 0; i < max; ++i)
         // if not all bytes are set in this byte
         if (b->bytes[i] != 0xFF) {
-            uint32_t offset;
-            for (offset = 0; offset < 8; ++offset) {
+            for (uint32_t offset = 0; offset < 8; ++offset) {
                 uint8_t mask = (uint8_t) 1 << offset;
                 // if this bit is not set
                 if ((b->bytes[i] & mask) == 0) {
@@ -63,7 +59,6 @@ kbitmap_alloc(struct kbitmap* b, uint32_t* index) {
             }
             panic("bitmap internal error");
         }
-    }
     return ENOSPC;
 }
 

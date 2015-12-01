@@ -55,13 +55,11 @@ irq_handler_serial(struct regs* r) {
 void
 putc_serial(int c) {
     if (serial) {
-        int i;
-        for (i = 0; i < 12800; ++i) {
+        for (int i = 0; i < 12800; ++i) {
             if (inb(SERIO + COM_LSR) & COM_LSR_TXRDY)
                 break;
             delay();
         }
-
         outb(SERIO + COM_TX, c);
     }
 }

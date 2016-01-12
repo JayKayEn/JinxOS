@@ -1,0 +1,8 @@
+OBJDIRS += $(OBJDIR)/proc
+
+OBJS += $(OBJDIR)/proc/proc.o
+OBJS += $(OBJDIR)/proc/pidreg.o
+
+$(OBJDIR)/proc/%.o: proc/%.c
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@echo " <+> $<"

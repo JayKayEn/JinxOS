@@ -1,0 +1,16 @@
+OBJDIRS += $(OBJDIR)/hw
+
+OBJS += $(OBJDIR)/hw/acpi.o
+OBJS += $(OBJDIR)/hw/cga.o
+OBJS += $(OBJDIR)/hw/e820.o
+OBJS += $(OBJDIR)/hw/ioapic.o
+OBJS += $(OBJDIR)/hw/kbd.o
+OBJS += $(OBJDIR)/hw/lapic.o
+OBJS += $(OBJDIR)/hw/pit.o
+OBJS += $(OBJDIR)/hw/serial.o
+OBJS += $(OBJDIR)/hw/speaker.o
+# OBJS += $(OBJDIR)/hw/
+
+$(OBJDIR)/hw/%.o: hw/%.c
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@echo " <+> $<"

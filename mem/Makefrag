@@ -1,0 +1,11 @@
+OBJDIRS += $(OBJDIR)/mem
+
+OBJS += $(OBJDIR)/mem/pmm.o
+OBJS += $(OBJDIR)/mem/kmm.o
+OBJS += $(OBJDIR)/mem/vmm.o
+OBJS += $(OBJDIR)/mem/mem.o
+OBJS += $(OBJDIR)/mem/mm.o
+
+$(OBJDIR)/mem/%.o: mem/%.c
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@echo " <+> $<"

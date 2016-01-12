@@ -1,0 +1,9 @@
+OBJDIRS += $(OBJDIR)/test
+
+OBJS += $(OBJDIR)/test/tests.o
+OBJS += $(OBJDIR)/test/thread_hello.o
+# OBJS += $(OBJDIR)/test/arraytest.o
+
+$(OBJDIR)/test/%.o: test/%.c
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@echo " <+> $<"

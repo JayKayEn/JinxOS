@@ -1,0 +1,18 @@
+OBJDIRS += $(OBJDIR)/kern
+
+OBJS += $(OBJDIR)/kern/entry.o
+OBJS += $(OBJDIR)/kern/asm.o
+OBJS += $(OBJDIR)/kern/gdt.o
+OBJS += $(OBJDIR)/kern/idt.o
+OBJS += $(OBJDIR)/kern/isr.o
+OBJS += $(OBJDIR)/kern/irq.o
+OBJS += $(OBJDIR)/kern/syscall.o
+OBJS += $(OBJDIR)/kern/kmain.o
+
+$(OBJDIR)/kern/%.o: kern/%.S
+	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
+	@echo " <+> $<"
+
+$(OBJDIR)/kern/%.o: kern/%.c
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@echo " <+> $<"

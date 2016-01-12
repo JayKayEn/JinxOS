@@ -1,18 +1,20 @@
 CC = i386-jos-elf-gcc
-CFLAGS = -Wall -Wextra -Werror -m32  -Wno-comment
+CFLAGS = -Wall -Wextra -Werror -m32 -Wno-comment
 CFLAGS += -gstabs
 # CFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-function
 # CFLAGS += -Wno-implicit-function-declaration -Wno-unused-parameter
 CFLAGS += -fno-builtin -fno-stack-protector -ffreestanding
 CFLAGS += -nostartfiles -nodefaultlibs -nostdinc -nostdlib
-CFLAGS += -I./include
+
+OBJDIR := obj
 
 LD = i386-jos-elf-ld
 LFLAGS = -m elf_i386 -nostdlib
 
-CP = i386-jos-elf-objcopy
+COPY = i386-jos-elf-objcopy
+DUMP = i386-jos-elf-objdump
 
-GCC_LIB = ./libgcc.a
+GCC_LIB = ./lib/libgcc.a
 # GCC_LIB = /usr/lib/gcc/x86_64-linux-gnu/4.8/libgcc.a
 # GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
@@ -24,24 +26,59 @@ CPUS ?= 1
 QEMU = qemu-system-i386
 
 QEMUOPTS = -m 256M -serial mon:stdio -smp cpus=$(CPUS) -gdb tcp::$(GDBPORT)
-# QEMUOPTS += -M q35
-QEMUOPTS += -drive file=jinx,format=raw,if=none,id=kernel
+QEMUOPTS += -M q35
+QEMUOPTS += -drive file=$(OBJDIR)/jinx,format=raw,if=none,id=kernel
 QEMUOPTS += -device piix4-ide,id=piix4-ide
 QEMUOPTS += -device ide-hd,drive=kernel,bus=piix4-ide.0
+QEMUOPTS += -smp 1
+# QEMUOPTS += -soundhw sb16,adlib,pcspk
 
-qemu: jinx
+default: $(OBJDIR)/jinx
+
+OBJS :=
+
+include boot/Makefrag
+include kern/Makefrag
+include debug/Makefrag
+include mem/Makefrag
+include hw/Makefrag
+include synch/Makefrag
+include lib/Makefrag
+include thread/Makefrag
+include cpu/Makefrag
+include proc/Makefrag
+include console/Makefrag
+include test/Makefrag
+
+INCLUDE := -I./include
+INCLUDE += -I./boot
+INCLUDE += -I./kern
+INCLUDE += -I./debug
+INCLUDE += -I./mem
+INCLUDE += -I./hw
+INCLUDE += -I./synch
+INCLUDE += -I./lib
+INCLUDE += -I./thread
+INCLUDE += -I./cpu
+INCLUDE += -I./proc
+INCLUDE += -I./console
+INCLUDE += -I./test
+
+CFLAGS += $(INCLUDE)
+
+qemu: $(OBJDIR)/jinx
 	@echo " <:> $@"
 	@$(QEMU) $(QEMUOPTS)
 
-nox: jinx
+nox: $(OBJDIR)/jinx
 	@echo " <:> $@"
 	@$(QEMU) -nographic $(QEMUOPTS)
 
-qemu-gdb: jinx .gdbinit
+qemu-gdb: $(OBJDIR)/jinx .gdbinit
 	@echo " <:> $@"
 	@$(QEMU) $(QEMUOPTS) -S
 
-nox-gdb: jinx .gdbinit
+nox-gdb: $(OBJDIR)/jinx .gdbinit
 	@echo " <:> $@"
 	@$(QEMU) -nographic $(QEMUOPTS) -S
 
@@ -51,34 +88,22 @@ gdb:
 .gdbinit: .gdbinit.tmpl
 	@sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
 
-jinx: kernel boot
-	@echo " <+> $@"
-	@dd if=/dev/zero of=jinx~ count=10000 2>/dev/null
-	@dd if=boot of=jinx~ conv=notrunc 2>/dev/null
-	@dd if=kernel of=jinx~ seek=1 conv=notrunc 2>/dev/null
-	@mv jinx~ jinx
+$(OBJDIR)/jinx: $(OBJDIR)/kernel $(OBJDIR)/boot/boot
+	@echo " <+> jinx"
+	@dd if=/dev/zero of=$(OBJDIR)/jinx~ count=20000 2>/dev/null
+	@dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/jinx~ conv=notrunc 2>/dev/null
+	@dd if=$(OBJDIR)/kernel of=$(OBJDIR)/jinx~ seek=1 conv=notrunc 2>/dev/null
+	@mv $(OBJDIR)/jinx~ $@
 
-OBJS := obj/entry.o obj/asm.o obj/gdt.o obj/idt.o obj/isr.o obj/e820.o obj/cga.o
-OBJS += obj/assert.o obj/console.o obj/irq.o obj/pit.o obj/kbd.o obj/cpu.o
-OBJS += obj/spinlock.o obj/kmain.o obj/pmm.o obj/serial.o obj/kbitmap.o obj/kmm.o
-
-LIBC += obj/mem.o obj/str.o obj/print.o obj/mm.o
-
-kernel: $(OBJS) $(LIBC)
+$(OBJDIR)/kernel: $(OBJS)
 	@$(LD) -o $@ -T linker.ld -nostdlib $(LFLAGS) $^ $(GCC_LIB)
-	@echo " <+> $@"
+	@$(DUMP) -S $@ > $@.asm
 
-boot: obj/boot.o obj/bmain.o
-	@$(LD) $(LFLAGS) -N -e start -Ttext 0x7C00 -o $@ $^
-	@$(CP) -S -O binary -j .text boot boot
-	@perl sign.pl boot
-	@echo " <+> $@"
-
-obj/%.o: %.S
+$(OBJDIR)/%.o: %.S
 	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $@"
 
-obj/%.o: %.c
+$(OBJDIR)/%.o: %.c
 	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $@"
 
@@ -87,4 +112,19 @@ backup: clean
 	git archive --format=tar HEAD | gzip > jinx.tar.gz
 
 clean:
-	rm -rf boot kernel jinx obj/* *~ *dSYM
+	rm -rf *~ *dSYM
+	rm -rf $(OBJDIR)/kernel
+	rm -rf $(OBJDIR)/kernel.asm
+	rm -rf $(OBJDIR)/jinx
+	rm -rf $(OBJDIR)/boot/*
+	rm -rf $(OBJDIR)/kern/*
+	rm -rf $(OBJDIR)/debug/*
+	rm -rf $(OBJDIR)/mem/*
+	rm -rf $(OBJDIR)/hw/*
+	rm -rf $(OBJDIR)/synch/*
+	rm -rf $(OBJDIR)/lib/*
+	rm -rf $(OBJDIR)/thread/*
+	rm -rf $(OBJDIR)/cpu/*
+	rm -rf $(OBJDIR)/proc/*
+	rm -rf $(OBJDIR)/console/*
+	rm -rf $(OBJDIR)/test/*

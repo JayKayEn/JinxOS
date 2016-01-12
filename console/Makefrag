@@ -1,0 +1,7 @@
+OBJDIRS += $(OBJDIR)/console
+
+OBJS += $(OBJDIR)/console/console.o
+
+$(OBJDIR)/console/%.o: console/%.c
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@echo " <+> $<"

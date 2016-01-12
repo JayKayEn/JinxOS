@@ -21,19 +21,39 @@ typedef uint32_t              size_t;
 
 #endif // _TYPES_
 
-static inline void
+static inline uint32_t read_eflags(void);
+
+static inline bool
 cli(void) {
-    asm volatile ("cli");
+    bool on = (read_eflags() >> 9) & 1;
+    asm volatile ("cli" : : : "memory");
+    return on;
 }
 
 static inline void
 sti(void) {
-    asm volatile ("sti");
+    asm volatile ("sti" : : : "memory");
+}
+
+static inline void
+ifx(bool set) {
+    if (set)
+        sti();
+}
+
+static inline void
+memory_barrier(void) {
+    asm volatile ("mfence" : : : "memory");
 }
 
 static inline void
 hlt(void) {
-    asm volatile ("hlt");
+    asm volatile ("hlt" : : : "memory");
+}
+
+static inline void
+pause(void) {
+    asm volatile ("pause");
 }
 
 static inline void

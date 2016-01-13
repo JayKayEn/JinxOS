@@ -27,4 +27,6 @@ extern void init_acpi(void);
 
 extern void init_speaker(void);
 
+extern void init_rand(void);
+
 #endif // _INIT_H_

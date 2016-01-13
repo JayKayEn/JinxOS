@@ -45,7 +45,7 @@ print(const char* fmt, ...) {
  */
 static void
 printnum(void (*putc)(int),
-         unsigned long long num, unsigned base, int width, int padc) {
+        unsigned long long num, unsigned base, int width, int padc) {
     // first recursively print all preceding (more significant) digits
     if (num >= base)
         printnum(putc, num / base, base, width - 1, padc);
@@ -56,6 +56,24 @@ printnum(void (*putc)(int),
 
     // then print this (the least significant) digit
     putc("0123456789abcdef"[num % base]);
+}
+
+static void
+printfloat(void (*putc)(int), long double real, int padc) {
+    (void) padc;
+    if (real < 0.0) {
+        putc('-');
+        real = -real;
+    }
+    unsigned long long integer = (unsigned long long) real;
+    printnum(putc, integer, 10, 0, padc);
+    long double fraction = real - integer;
+    putc('.');
+    for (int i = 0; i < 8; ++i) {
+        fraction *= 10;
+    }
+    integer = (unsigned long long) fraction;
+    printnum(putc, integer, 10, 0, padc);
 }
 
 // Get an unsigned int of various possible sizes from a varargs list,
@@ -82,6 +100,14 @@ getint(va_list* ap, int lflag) {
         return va_arg(*ap, int);
 }
 
+static long double
+getfloat(va_list* ap, int lflag) {
+    if (lflag)
+        return va_arg(*ap, long double);
+    else
+        return va_arg(*ap, double);
+}
+
 
 // Main function to format and print a string.
 void printfmt(void (*putc)(int), const char* fmt, ...);
@@ -91,6 +117,7 @@ vprintfmt(void (*putc)(int), const char* fmt, va_list ap) {
     register const char* p;
     register int ch;
     unsigned long long num;
+    long double real;
     int base, lflag, width, precision, altflag;
     char padc;
 
@@ -220,6 +247,11 @@ process_precision:
                 base = 16;
 number:
                 printnum(putc, num, base, width, padc);
+                break;
+
+            case 'f':
+                real = getfloat(&ap, lflag);
+                printfloat(putc, real, padc);
                 break;
 
             // escaped '%' character

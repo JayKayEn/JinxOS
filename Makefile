@@ -108,8 +108,8 @@ $(OBJDIR)/%.o: %.c
 	@echo " <+> $@"
 
 backup: clean
-	rm -f jinx.tar.gz
-	git archive --format=tar HEAD | gzip > jinx.tar.gz
+	# git archive --format=tar HEAD | gzip > jinx.tar.gz
+	tar czf ../JinxOS.tar.gz --exclude=obj --exclude=_files .
 
 clean:
 	rm -rf *~ *dSYM

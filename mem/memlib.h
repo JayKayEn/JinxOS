@@ -1,6 +1,6 @@
 #include <lib.h>
 
-#define MAX_HEAP (1 * (1 << 20))
+#define MAX_HEAP (4 * (1 << 20))
 
 void init_mem(void);
 void mem_deinit(void);

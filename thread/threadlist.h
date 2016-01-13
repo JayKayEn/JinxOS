@@ -61,12 +61,12 @@ void threadlist_remove(struct threadlist* tl, struct thread* t);
 #define THREADLIST_FORALL(itervar, tl) \
     for ((itervar) = (tl).tl_head.tln_next->tln_self; \
          (itervar) != NULL; \
-         (itervar) = (itervar)->t_listnode.tln_next->tln_self)
+         (itervar) = (itervar)->listnode.tln_next->tln_self)
 
 #define THREADLIST_FORALL_REV(itervar, tl) \
     for ((itervar) = (tl).tl_tail.tln_prev->tln_self; \
          (itervar) != NULL; \
-         (itervar) = (itervar)->t_listnode.tln_prev->tln_self)
+         (itervar) = (itervar)->listnode.tln_prev->tln_self)
 
 
 #endif /* _THREADLIST_H_ */

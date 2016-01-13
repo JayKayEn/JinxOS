@@ -120,7 +120,10 @@ thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
     assert(thiscpu->thread == thisthread);
     assert(thisthread->cpu == thiscpu->self);
 
-    thread_exorcise();
+    // we may already have stackreg's spinlock and we can't reacquire it so skip
+    // exorcising if going to sleep
+    if (newstate != S_SLEEP)
+        thread_exorcise();
 
     /*
      * If we're idle, return without doing anything. this happens
@@ -181,7 +184,6 @@ thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
 
     switchframe_switch(next->context);
 
-    memory_barrier();
     panic("switchframe_switch returned");
 }
 

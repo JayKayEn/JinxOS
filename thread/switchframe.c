@@ -3,11 +3,14 @@
 #include <pmm.h>
 #include <int.h>
 #include <thread.h>
+#include <debug.h>
 
 void
 switchframe_switch(struct regs* regs) {
     assert(regs != NULL);
+    // print_regs(regs);
 
+    memory_barrier();
     asm volatile(
         "\tmovl     %0,%%esp\n"
         "\tpopl     %%ds\n"
@@ -17,11 +20,12 @@ switchframe_switch(struct regs* regs) {
         "\tiret\n"
         : : "g" (regs) : "memory");
 
-    panic("returned from iret instruction");
+    panic("returned to switchframe_switch");
 }
 
 static void
 switchframe_start(void) {
+    memory_barrier();
     asm volatile(
         "\tpushl    %%edx\n"
         "\tpushl    %%ecx\n"
@@ -29,7 +33,7 @@ switchframe_start(void) {
         "\tcall     thread_startup\n"
         : : : "memory");
 
-    panic("returned from call to thread_startup");
+    panic("returned to switchframe_start");
 }
 
 void

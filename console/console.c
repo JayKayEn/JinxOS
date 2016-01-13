@@ -22,10 +22,7 @@ int cmd_meminfo(int argc, char* argv[]);
 int cmd_reboot(int argc, char* argv[]);
 int cmd_timestamp(int argc, char* argv[]);
 int cmd_ticks(int argc, char* argv[]);
-int cmd_tests(int argc, char* argv[]);
-int cmd_fork1(int argc, char* argv[]);
-int cmd_fork2(int argc, char* argv[]);
-int cmd_hello(int argc, char* argv[]);
+int cmd_test(int argc, char* argv[]);
 
 static const struct cmd {
     const char* name;
@@ -65,28 +62,15 @@ static const struct cmd {
         cmd_reboot
     },
     {
-        "tt", "      Run synchronization and thread tests",
-        cmd_tests
-    },
-    {
-        "hello", "   Run a threaded program",
-        cmd_hello
+        "test", "    Run system tests",
+        cmd_test
     }
 };
 
-extern int thread_hello(int nargs, char **args);
+extern int test_suite(int argc, char* argv[]);
 int
-cmd_hello(int argc, char* argv[]) {
-    return thread_hello(argc, argv);
-}
-
-extern int tests(int nargs, char **args);
-int
-cmd_tests(int argc, char* argv[]) {
-    for (int i = 0; i < 500; ++i)
-        tests(argc, argv);
-    sti();
-    return 0;
+cmd_test(int argc, char* argv[]) {
+    return test_suite(argc, argv);
 }
 
 int

@@ -1,8 +1,19 @@
 OBJDIRS += $(OBJDIR)/test
 
-OBJS += $(OBJDIR)/test/tests.o
-OBJS += $(OBJDIR)/test/thread_hello.o
-# OBJS += $(OBJDIR)/test/arraytest.o
+OBJS += $(OBJDIR)/test/test.o
+OBJS += $(OBJDIR)/test/arraytest.o
+OBJS += $(OBJDIR)/test/bitmaptest.o
+OBJS += $(OBJDIR)/test/hashtabletest.o
+OBJS += $(OBJDIR)/test/heaptest.o
+OBJS += $(OBJDIR)/test/listtest.o
+OBJS += $(OBJDIR)/test/queuetest.o
+OBJS += $(OBJDIR)/test/threadlisttest.o
+OBJS += $(OBJDIR)/test/threadtest.o
+OBJS += $(OBJDIR)/test/threadtest3.o
+OBJS += $(OBJDIR)/test/threadtest4.o
+OBJS += $(OBJDIR)/test/malloctest.o
+OBJS += $(OBJDIR)/test/cvtest.o
+OBJS += $(OBJDIR)/test/locktest.o
 
 $(OBJDIR)/test/%.o: test/%.c
 	@$(CC) $(CFLAGS) -Os -c -o $@ $<

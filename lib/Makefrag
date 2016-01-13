@@ -4,13 +4,16 @@ OBJS += $(OBJDIR)/lib/assert.o
 OBJS += $(OBJDIR)/lib/print.o
 OBJS += $(OBJDIR)/lib/snprintf.o
 OBJS += $(OBJDIR)/lib/string.o
+OBJS += $(OBJDIR)/lib/random.o
+OBJS += $(OBJDIR)/lib/atoi.o
 
 # ADTs
 
 OBJS += $(OBJDIR)/lib/array.o
+OBJS += $(OBJDIR)/lib/heap.o
 OBJS += $(OBJDIR)/lib/list.o
-OBJS += $(OBJDIR)/lib/bitmap.o
 OBJS += $(OBJDIR)/lib/queue.o
+OBJS += $(OBJDIR)/lib/bitmap.o
 OBJS += $(OBJDIR)/lib/hashtable.o
 OBJS += $(OBJDIR)/lib/bitmap_ts.o
 OBJS += $(OBJDIR)/lib/queue_ts.o

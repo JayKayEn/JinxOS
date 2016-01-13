@@ -6,45 +6,52 @@
  * functions.
  */
 
+int test_suite(int argc, char* argv[]);
+int alltests(int argc, char* argv[]);
 
 /*
  * Test code.
  */
 
 /* data structure tests */
-int arraytest(int, char **);
-int bitmaptest(int, char **);
-int listtest(int, char **);
-int queuetest(int, char **);
-int heaptest(int, char **);
-int hashtabletest(int, char **);
-int threadlisttest(int, char **);
+int arraytest(int argc, char* argv[]);
+int bitmaptest(int argc, char* argv[]);
+int listtest(int argc, char* argv[]);
+int queuetest(int argc, char* argv[]);
+int heaptest(int argc, char* argv[]);
+int hashtabletest(int argc, char* argv[]);
+int threadlisttest(int argc, char* argv[]);
 
 /* thread tests */
-int threadtest(int, char **);
-int threadtest2(int, char **);
-int threadtest3(int, char **);
-int semtest(int, char **);
-int locktest(int, char **);
-int cvtest(int, char **);
+int threadtest(int argc, char* argv[]);
+int threadtest2(int argc, char* argv[]);
+int threadtest3(int argc, char* argv[]);
+int threadtest4(int argc, char* argv[]);
+int semtest(int argc, char* argv[]);
+int locktest(int argc, char* argv[]);
+int cvtest(int argc, char* argv[]);
+
+int synchtest(int argc, char* argv[]);
+int threadforktest(int argc, char* argv[]);
 
 // /* filesystem tests */
-// int fstest(int, char **);
-// int readstress(int, char **);
-// int writestress(int, char **);
-// int writestress2(int, char **);
-// int longstress(int, char **);
-// int createstress(int, char **);
-// int printfile(int, char **);
+// int fstest(int argc, char* argv[]);
+// int readstress(int argc, char* argv[]);
+// int writestress(int argc, char* argv[]);
+// int writestress2(int argc, char* argv[]);
+// int longstress(int argc, char* argv[]);
+// int createstress(int argc, char* argv[]);
+// int printfile(int argc, char* argv[]);
 
 /* other tests */
-int malloctest(int, char **);
-int mallocstress(int, char **);
-int malloctest3(int, char **);
-// int nettest(int, char **);
+int malloctest(int argc, char* argv[]);
+int malloctest2(int argc, char* argv[]);
+int mallocstress(int argc, char* argv[]);
+
+// int nettest(int argc, char* argv[]);
 
 // #if OPT_SYNCHPROBS
-// int netqueuetest(int, char **);
+// int netqueuetest(int argc, char* argv[]);
 // #endif
 
 // /* Routine for running a user-level program. */
@@ -56,5 +63,6 @@ int malloctest3(int, char **);
 // /* The main function, called from start.S. */
 // void kmain(char *bootstring);
 
+int extreme(int argc, char* argv[]);
 
 #endif // _TEST_H_ */

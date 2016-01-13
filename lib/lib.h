@@ -25,6 +25,7 @@ typedef uint32_t              size_t;
 
 #endif // _TYPES_
 
+int atoi(const char *s);
 char getc(void);
 void putc(const char c);
 void puts(const char* text);
@@ -101,5 +102,7 @@ void _panic(const char* file, int line, const char* func, const char* fmt, ...);
 #define ARRAY_SIZE(a)   (sizeof(a) / sizeof(a[0]))
 
 #define bitsize(a) (sizeof(n) << 3)
+
+uint64_t random(void);
 
 #endif // _LIB_H_

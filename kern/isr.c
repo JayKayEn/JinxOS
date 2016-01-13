@@ -165,6 +165,8 @@ void isr_handler(struct regs* r) {
                 print("Unanticipated exception");
             print(" (%u).  System halted.\n\n", r->int_no);
 
+            print_regs(r);
+
             if (isr_routines[r->int_no] != NULL)
                 isr_routines[r->int_no](r);
 

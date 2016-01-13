@@ -12,6 +12,7 @@
 #include <pit.h>
 // #include <acpi.h>
 #include <cpu.h>
+#include <test.h>
 
 // demand() will restart if the expression evaluates to false
 #define demand(exp)                                         \
@@ -91,6 +92,8 @@ kmain(uint32_t eax, size_t ebx) {
 
     init_proc();
 
+    init_rand();
+
     // uint32_t stacktop = (uint32_t) thisthread->stack + STACK_SIZE;
     // thisthread->context = (struct regs*) stacktop - 1;
     // print("%08p\n", thisthread->context);
@@ -103,14 +106,6 @@ kmain(uint32_t eax, size_t ebx) {
     //     : : "a" (thisthread->context)
     // );
 
-    // asm volatile (
-    //     "pushl %%ebx\n"
-    //     "movl $0x10, %%ebx\n"
-    //     "movl %%ebx, %%ss\n"
-    //     "popl %%ebx\n"
-    //     : : : "memory"
-    // );
-
     init_lapic();
 
     sti();
@@ -119,8 +114,6 @@ kmain(uint32_t eax, size_t ebx) {
     // lock_kernel();
 
     jinx();
-
-    print("interrupt flag: %s\n", (read_eflags() >> 9) & 1 ? "on" : "off");
 
     // print("thiscpu->cpuno: %u\n", thiscpu->cpuno);
     // print("thiscpu->apicid: %u\n", thiscpu->apicid);

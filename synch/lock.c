@@ -54,13 +54,11 @@ lock_acquire(struct lock* lock) {
 
     bool iflag = cli();
 
+    spinlock_acquire(&lock->lk_lock);
     if (!lock_holding(lock)) {
-        spinlock_acquire(&lock->lk_lock);
 
         while (lock->lk_count > 0)
             wchan_sleep(lock->lk_wchan, &lock->lk_lock);
-
-        spinlock_release(&lock->lk_lock);
 
         assert(lock->lk_count == 0);
         assert(lock->lk_owner == NULL);
@@ -69,6 +67,8 @@ lock_acquire(struct lock* lock) {
 
     lock->lk_count++;
     assert(lock_holding(lock));
+
+    spinlock_release(&lock->lk_lock);
 
     ifx(iflag);
 }
@@ -82,16 +82,14 @@ lock_release(struct lock* lock) {
     spinlock_acquire(&lock->lk_lock);
 
     // if I don't hold lock, I can't release it
-    assert(lock_holding(lock)); // Won't compile with &lock
+    assert(lock_holding(lock));
     assert(lock->lk_count > 0);
 
     lock->lk_count--;
-
     if (lock->lk_count == 0) {
-        // time for a new thread to acquire this lock
         lock->lk_owner = NULL;
         wchan_wakeone(lock->lk_wchan, &lock->lk_lock);
-    }  // else this thread maintains its hold on the lock
+    }
 
     spinlock_release(&lock->lk_lock);
 

@@ -45,7 +45,7 @@ print(const char* fmt, ...) {
  */
 static void
 printnum(void (*putc)(int),
-        unsigned long long num, unsigned base, int width, int padc) {
+         unsigned long long num, unsigned base, int width, int padc) {
     // first recursively print all preceding (more significant) digits
     if (num >= base)
         printnum(putc, num / base, base, width - 1, padc);
@@ -69,9 +69,8 @@ printfloat(void (*putc)(int), long double real, int padc) {
     printnum(putc, integer, 10, 0, padc);
     long double fraction = real - integer;
     putc('.');
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; ++i)
         fraction *= 10;
-    }
     integer = (unsigned long long) fraction;
     printnum(putc, integer, 10, 0, padc);
 }

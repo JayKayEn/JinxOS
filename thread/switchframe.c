@@ -8,9 +8,8 @@
 void
 switchframe_switch(struct regs* regs) {
     assert(regs != NULL);
-    // print_regs(regs);
 
-    memory_barrier();
+    // memory_barrier();
     asm volatile(
         "\tmovl     %0,%%esp\n"
         "\tpopl     %%ds\n"
@@ -18,28 +17,30 @@ switchframe_switch(struct regs* regs) {
         "\tpopal\n"
         "\taddl     $0x8,%%esp\n"
         "\tiret\n"
-        : : "g" (regs) : "memory");
+        : : "g" (regs) : "memory"
+    );
 
     panic("returned to switchframe_switch");
 }
 
 static void
 switchframe_start(void) {
-    memory_barrier();
+    // memory_barrier();
     asm volatile(
         "\tpushl    %%edx\n"
         "\tpushl    %%ecx\n"
         "\tpushl    %%eax\n"
-        "\tcall     thread_startup\n"
-        : : : "memory");
+        "\tcall     thread_start\n"
+        : : : "memory"
+    );
 
     panic("returned to switchframe_start");
 }
 
 void
 switchframe_init(struct thread* thread,
-        int (*entrypoint)(void* data1, unsigned long data2),
-        void* data1, unsigned long data2) {
+                 int (*entrypoint)(void* data1, unsigned long data2),
+                 void* data1, unsigned long data2) {
     uint32_t stacktop = (uint32_t) thread->stack + STACK_SIZE;
 
     thread->context = (struct regs*) stacktop - 1;
@@ -49,7 +50,7 @@ switchframe_init(struct thread* thread,
     thread->context->ds = GD_KD;
     thread->context->es = GD_KD;
     thread->context->ss = GD_KD;
-    thread->context->eflags = FL_IF;
+    // thread->context->eflags = FL_IF;
 
     thread->context->eax = (uint32_t) entrypoint;
     thread->context->ecx = (uint32_t) data1;

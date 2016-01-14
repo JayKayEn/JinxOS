@@ -5,7 +5,7 @@
 #define TESTSIZE 1333
 
 int
-hashtabletest(int nargs, char **args) {
+hashtabletest(int nargs, char** args) {
     (void)nargs;
     (void)args;
 

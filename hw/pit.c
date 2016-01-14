@@ -6,9 +6,8 @@
 #include <debug.h>
 #include <lapic.h>
 
-// #define PIT_DEFAULT  1
-// #define PIT_DEFAULT  200.0
-#define PIT_DEFAULT 10000
+#define PIT_DEFAULT  10000
+// #define PIT_DEFAULT 18.222
 #define YIELD_MOD   1
 
 static volatile uint32_t nticks;

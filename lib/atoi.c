@@ -7,32 +7,30 @@
  */
 
 int
-atoi(const char *s) {
+atoi(const char* s) {
     static const char digits[] = "0123456789";
-    unsigned val=0;
+    unsigned val = 0;
 
 
     /* skip whitespace */
-    while (*s==' ' || *s=='\t') {
+    while (*s == ' ' || *s == '\t')
         s++;
-    }
 
     bool neg = false;
-    if (*s=='-') {
+    if (*s == '-') {
         neg = true;
         s++;
-    } else if (*s=='+') {
+    } else if (*s == '+')
         s++;
-    }
 
     /* process each digit */
     while (*s) {
-        const char *where;
+        const char* where;
         unsigned digit;
 
         /* look for the digit in the list of digits */
         where = strchr(digits, *s);
-        if (where==NULL) {
+        if (where == NULL) {
             /* not found; not a digit, so stop */
             break;
         }
@@ -43,16 +41,15 @@ atoi(const char *s) {
         /* could (should?) check for overflow here */
 
         /* shift the number over and add in the new digit */
-        val = val*10 + digit;
+        val = val * 10 + digit;
 
         /* look at the next character */
         s++;
     }
 
     /* handle negative numbers */
-    if (neg) {
+    if (neg)
         return -val;
-    }
 
     /* done */
     return val;

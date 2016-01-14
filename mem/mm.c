@@ -152,8 +152,8 @@ static void increase_heap(size_t size) {
 static size_t valid_size(size_t size) {
     size += WORD_SIZE;
     size_t valid = size <= MIN_BLOCK_SIZE
-            ? MIN_BLOCK_SIZE
-            : ALIGNMENT * ((size + ALIGNMENT - 1) / ALIGNMENT);
+                   ? MIN_BLOCK_SIZE
+                   : ALIGNMENT * ((size + ALIGNMENT - 1) / ALIGNMENT);
     return valid;
 }
 
@@ -446,7 +446,7 @@ void* krealloc(void* ptr, size_t size) {
     // new block and copy the block's data to the new payload and free the old
     // block.
     struct block* new_block = (struct block*)
-            SUB(kmalloc(alloc_size - WORD_SIZE), WORD_SIZE);
+                              SUB(kmalloc(alloc_size - WORD_SIZE), WORD_SIZE);
     copy_payload(block, new_block);
     kfree(ADD(block, WORD_SIZE));
 

@@ -7,11 +7,13 @@
 
 #define PACKED __attribute__((packed))
 #define PAGE_ALIGNED __attribute__((aligned(PG_SIZE)))
+#define THISCALL __attribute__((thiscall))
 
 #else
 
 #define PACKED
 #define PAGE_ALIGNED
+#define THISCALL
 
 #endif // __GNUC__
 

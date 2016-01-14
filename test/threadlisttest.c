@@ -5,7 +5,7 @@
 #include <kmm.h>
 
 #define NUMNAMES 7
-static const char *const names[NUMNAMES] = {
+static const char* const names[NUMNAMES] = {
     "Aillard",
     "Aldaran",
     "Alton",
@@ -15,7 +15,7 @@ static const char *const names[NUMNAMES] = {
     "Ridenow",
 };
 
-static struct thread *fakethreads[NUMNAMES];
+static struct thread* fakethreads[NUMNAMES];
 
 ////////////////////////////////////////////////////////////
 // fakethread
@@ -26,20 +26,18 @@ static struct thread *fakethreads[NUMNAMES];
  * Create a dummy struct thread that we can put on lists for testing.
  */
 static
-struct thread *
-fakethread_create(const char *name) {
-    struct thread *t;
+struct thread*
+fakethread_create(const char* name) {
+    struct thread* t;
 
     t = kmalloc(sizeof(*t));
-    if (t == NULL) {
+    if (t == NULL)
         panic("threadlisttest: Out of memory\n");
-    }
     /* ignore most of the fields, zero everything for tidiness */
     memset(t, 0, sizeof(*t));
     t->name = strdup(name);
-    if (t->name == NULL) {
+    if (t->name == NULL)
         panic("threadlisttest: Out of memory\n");
-    }
     t->stack = FAKE_MAGIC;
     threadlistnode_init(&t->listnode, t);
     return t;
@@ -50,7 +48,7 @@ fakethread_create(const char *name) {
  */
 static
 void
-fakethread_destroy(struct thread *t) {
+fakethread_destroy(struct thread* t) {
     assert(t->stack == FAKE_MAGIC);
     threadlistnode_cleanup(&t->listnode);
     kfree(t->name);
@@ -62,14 +60,14 @@ fakethread_destroy(struct thread *t) {
 
 static
 void
-check_order(struct threadlist *tl, bool rev) {
+check_order(struct threadlist* tl, bool rev) {
     const char string0[] = "...";
     const char stringN[] = "~~~";
 
-    struct thread *t;
-    const char *first = rev ? stringN : string0;
-    const char *last = rev ? string0 : stringN;
-    const char *prev;
+    struct thread* t;
+    const char* first = rev ? stringN : string0;
+    const char* last = rev ? string0 : stringN;
+    const char* prev;
     int cmp;
 
     prev = first;
@@ -99,7 +97,7 @@ static
 void
 threadlisttest_b(void) {
     struct threadlist tl;
-    struct thread *t;
+    struct thread* t;
 
     threadlist_init(&tl);
 
@@ -126,7 +124,7 @@ static
 void
 threadlisttest_c(void) {
     struct threadlist tl;
-    struct thread *t;
+    struct thread* t;
 
     threadlist_init(&tl);
 
@@ -161,7 +159,7 @@ static
 void
 threadlisttest_d(void) {
     struct threadlist tl;
-    struct thread *t;
+    struct thread* t;
 
     threadlist_init(&tl);
 
@@ -196,7 +194,7 @@ static
 void
 threadlisttest_e(void) {
     struct threadlist tl;
-    struct thread *t;
+    struct thread* t;
     unsigned i;
 
     threadlist_init(&tl);
@@ -219,15 +217,15 @@ threadlisttest_e(void) {
     check_order(&tl, false);
 
     assert(fakethreads[4]->listnode.tln_prev->tln_self ==
-            fakethreads[3]);
+           fakethreads[3]);
     assert(fakethreads[3]->listnode.tln_prev->tln_self ==
-            fakethreads[2]);
+           fakethreads[2]);
     assert(fakethreads[2]->listnode.tln_prev->tln_self ==
-            fakethreads[1]);
+           fakethreads[1]);
     assert(fakethreads[1]->listnode.tln_prev->tln_self ==
-            fakethreads[0]);
+           fakethreads[0]);
 
-    for (i=0; i<5; i++) {
+    for (i = 0; i < 5; i++) {
         t = threadlist_remhead(&tl);
         assert(t == fakethreads[i]);
     }
@@ -240,31 +238,30 @@ static
 void
 threadlisttest_f(void) {
     struct threadlist tl;
-    struct thread *t;
+    struct thread* t;
     unsigned i;
 
     threadlist_init(&tl);
 
-    for (i=0; i<NUMNAMES; i++) {
+    for (i = 0; i < NUMNAMES; i++)
         threadlist_addtail(&tl, fakethreads[i]);
-    }
     assert(tl.tl_count == NUMNAMES);
 
-    i=0;
+    i = 0;
     THREADLIST_FORALL(t, tl) {
         assert(t == fakethreads[i]);
         i++;
     }
     assert(i == NUMNAMES);
 
-    i=0;
+    i = 0;
     THREADLIST_FORALL_REV(t, tl) {
         assert(t == fakethreads[NUMNAMES - i - 1]);
         i++;
     }
     assert(i == NUMNAMES);
 
-    for (i=0; i<NUMNAMES; i++) {
+    for (i = 0; i < NUMNAMES; i++) {
         t = threadlist_remhead(&tl);
         assert(t == fakethreads[i]);
     }
@@ -275,7 +272,7 @@ threadlisttest_f(void) {
 // external interface
 
 int
-threadlisttest(int nargs, char **args) {
+threadlisttest(int nargs, char** args) {
     unsigned i;
 
     (void)nargs;
@@ -283,9 +280,8 @@ threadlisttest(int nargs, char **args) {
 
     print("Testing threadlists...\n");
 
-    for (i=0; i<NUMNAMES; i++) {
+    for (i = 0; i < NUMNAMES; i++)
         fakethreads[i] = fakethread_create(names[i]);
-    }
 
     threadlisttest_a();
     threadlisttest_b();
@@ -294,7 +290,7 @@ threadlisttest(int nargs, char **args) {
     threadlisttest_e();
     threadlisttest_f();
 
-    for (i=0; i<NUMNAMES; i++) {
+    for (i = 0; i < NUMNAMES; i++) {
         fakethread_destroy(fakethreads[i]);
         fakethreads[i] = NULL;
     }

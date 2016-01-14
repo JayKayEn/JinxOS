@@ -77,7 +77,7 @@ stack_available(void) {
 
     lock_acquire(kstackreg->lk);
     bool res = kstackreg->scounter < NSTACK
-            || !queue_isempty(kstackreg->stack_reuse);
+               || !queue_isempty(kstackreg->stack_reuse);
     lock_release(kstackreg->lk);
 
     return res;

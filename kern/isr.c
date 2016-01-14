@@ -147,9 +147,7 @@ void isr_handler(struct regs* r) {
             uint32_t arg1 = r->edx;
             uint32_t arg2 = r->ecx;
             uint32_t arg3 = r->ebx;
-            uint32_t arg4 = r->edi;
-            uint32_t arg5 = r->esi;
-            r->eax = syscall(syscallno, arg1, arg2, arg3, arg4, arg5);
+            r->eax = syscall(syscallno, arg1, arg2, arg3);
             break;
         }
         default: {
@@ -165,7 +163,10 @@ void isr_handler(struct regs* r) {
                 print("Unanticipated exception");
             print(" (%u).  System halted.\n\n", r->int_no);
 
-            print_regs(r);
+            if (r->int_no == 13)
+                print_regs(thisthread->context);
+            else
+                print_regs(r);
 
             if (isr_routines[r->int_no] != NULL)
                 isr_routines[r->int_no](r);

@@ -404,8 +404,9 @@ init_cpu(void) {
     bootcpu = cpu_create(apicids[0]);
     assert(cpus[0] != NULL);
 
-    thisthread = bootcpu->thread;
+    thisthread = bootthread = bootcpu->thread;
+
     thisthread->cpu = bootcpu;
     thisthread->page_directory = kpd;
-    thisthread->stack = stackreg_get();
+    // thisthread->stack = stackreg_get();
 }

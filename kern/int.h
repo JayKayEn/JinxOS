@@ -3,9 +3,9 @@
 
 #include <lib.h>
 
-#define FL_IF   0x00000200  // Interrupt Flag
-#define GD_KT   0x08        // kernel text
-#define GD_KD   0x10        // kernel data
+#define FL_IF   0x200   // Interrupt Flag
+#define GD_KT   0x08    // kernel text
+#define GD_KD   0x10    // kernel data
 
 struct regs {
     uint32_t es;

@@ -29,7 +29,7 @@ int pop_blocking_seq(void);
 int push_pop_par(void*, unsigned long);
 
 // main test function that called each test suite
-int tests(int nargs, char **args) {
+int tests(int nargs, char** args) {
     (void) nargs;  // suppress warnings
     (void) args;   // suppress warnings
 
@@ -268,9 +268,8 @@ int push_pop_par(void* data1, unsigned long data2) {
     (void) data2;
     void* j = NULL;
     assert(queue_ts_isempty(q));
-    if ((j = queue_ts_pop_blocking(q)) == NULL) {
+    if ((j = queue_ts_pop_blocking(q)) == NULL)
         return -1;
-    }
     kfree(j);
 
     return 0;

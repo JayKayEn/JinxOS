@@ -26,9 +26,8 @@ void trickle_down(struct heap* h, int index);
 struct heap*
 heap_create(int(*comparator)(const void*, const void*)) {
     struct heap* h = (struct heap*)kmalloc(sizeof(struct heap));
-    if (h == NULL) {
+    if (h == NULL)
         return NULL;
-    }
     h->comparator = comparator;
     h->vals = array_create();
     if (h->vals == NULL) {
@@ -61,9 +60,8 @@ void*
 heap_pop(struct heap* h) {
     assert(h != NULL);
     ASSERT_HEAP(h);
-    if (h->vals->num == 0) {
+    if (h->vals->num == 0)
         return NULL;
-    }
     void* top = array_get(h->vals, 0);
     void* last = array_get(h->vals, h->vals->num - 1);
     array_set(h->vals, 0, last);
@@ -137,17 +135,15 @@ trickle_down(struct heap* h, int index) {
         if (r < h->vals->num &&
                 h->comparator(array_get(vals, r), array_get(vals, index))) {
             l = LEFT(index);
-            if (h->comparator(array_get(vals, l), array_get(vals, r))) {
+            if (h->comparator(array_get(vals, l), array_get(vals, r)))
                 j = l;
-            } else {
+            else
                 j = r;
-            }
         } else {
             l = LEFT(index);
             if (l < h->vals->num &&
-                    h->comparator(array_get(vals, l), array_get(vals, index))) {
+                    h->comparator(array_get(vals, l), array_get(vals, index)))
                 j = l;
-            }
         }
         if (j >= 0) {
             /* SWAP */

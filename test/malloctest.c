@@ -26,19 +26,19 @@
 
 static
 int
-mallocthread(void *sm, unsigned long num) {
-    struct semaphore *sem = sm;
-    void *ptr;
-    void *oldptr=NULL;
-    void *oldptr2=NULL;
+mallocthread(void* sm, unsigned long num) {
+    struct semaphore* sem = sm;
+    void* ptr;
+    void* oldptr = NULL;
+    void* oldptr2 = NULL;
     int i;
 
-    for (i=0; i<NTRIES; i++) {
+    for (i = 0; i < NTRIES; i++) {
         ptr = kmalloc(ITEMSIZE);
-        if (ptr==NULL) {
+        if (ptr == NULL) {
             if (sem) {
                 print("thread %lu: kmalloc returned NULL\n",
-                        num);
+                      num);
                 V(sem);
                 return -1;
             }
@@ -62,7 +62,7 @@ mallocthread(void *sm, unsigned long num) {
 }
 
 int
-malloctest(int argc, char **argv) {
+malloctest(int argc, char** argv) {
     (void)argc;
     (void)argv;
 
@@ -74,31 +74,28 @@ malloctest(int argc, char **argv) {
 }
 
 int
-mallocstress(int argc, char **argv) {
-    struct semaphore *sem;
+mallocstress(int argc, char** argv) {
+    struct semaphore* sem;
     int i, result;
 
     (void)argc;
     (void)argv;
 
     sem = semaphore_create("mallocstress", 0);
-    if (sem == NULL) {
+    if (sem == NULL)
         panic("mallocstress: semaphore_create failed\n");
-    }
 
     print("Starting kmalloc stress test...\n");
 
-    for (i=0; i<NTHREADS; i++) {
+    for (i = 0; i < NTHREADS; i++) {
         result = thread_fork("mallocstress", NULL, NULL,
                              mallocthread, sem, i);
-        if (result) {
+        if (result)
             panic("mallocstress: thread_fork failed\n");
-        }
     }
 
-    for (i=0; i<NTHREADS; i++) {
+    for (i = 0; i < NTHREADS; i++)
         P(sem);
-    }
 
     semaphore_destroy(sem);
     print("kmalloc stress test done\n");
@@ -115,11 +112,11 @@ malloctester(unsigned numptrs) {
     size_t ptrspace;
     size_t blocksize;
     unsigned numptrblocks;
-    void ***ptrblocks;
+    void** *ptrblocks;
     unsigned curblock, curpos, cursizeindex, cursize;
     size_t totalsize;
     unsigned i, j;
-    unsigned char *ptr;
+    unsigned char* ptr;
 
     ptrspace = numptrs * sizeof(void*);
 
@@ -128,40 +125,37 @@ malloctester(unsigned numptrs) {
     numptrblocks = DIVROUNDUP(ptrspace, blocksize);
 
     print("malloctest2: %u objects, %u pointer blocks\n",
-            numptrs, numptrblocks);
+          numptrs, numptrblocks);
 
     ptrblocks = kmalloc(numptrblocks * sizeof(ptrblocks[0]));
-    if (ptrblocks == NULL) {
+    if (ptrblocks == NULL)
         panic("malloctest2: failed on pointer block array\n");
-    }
-    for (i=0; i<numptrblocks; i++) {
+    for (i = 0; i < numptrblocks; i++) {
         ptrblocks[i] = kmalloc(blocksize);
-        if (ptrblocks[i] == NULL) {
+        if (ptrblocks[i] == NULL)
             panic("malloctest2: failed on pointer block %u\n", i);
-        }
     }
 
     curblock = 0;
     curpos = 0;
     cursizeindex = 0;
     totalsize = 0;
-    for (i=0; i<numptrs; i++) {
+    for (i = 0; i < numptrs; i++) {
         cursize = sizes[cursizeindex];
         ptr = kmalloc(cursize);
         if (ptr == NULL) {
             print("malloctest2: failed on object %u size %u\n",
-                    i, cursize);
+                  i, cursize);
             print("malloctest2: pos %u in pointer block %u\n",
-                    curpos, curblock);
+                  curpos, curblock);
             print("malloctest2: total so far %u\n", totalsize);
             panic("malloctest2: failed.\n");
         }
-        for (j=0; j<cursize; j++) {
+        for (j = 0; j < cursize; j++)
             ptr[j] = (unsigned char) i;
-        }
         ptrblocks[curblock][curpos] = ptr;
         curpos++;
-        if (curpos >= blocksize / sizeof(void *)) {
+        if (curpos >= blocksize / sizeof(void*)) {
             curblock++;
             curpos = 0;
         }
@@ -173,26 +167,25 @@ malloctester(unsigned numptrs) {
     curblock = 0;
     curpos = 0;
     cursizeindex = 0;
-    for (i=0; i<numptrs; i++) {
+    for (i = 0; i < numptrs; i++) {
         cursize = sizes[cursizeindex];
         ptr = ptrblocks[curblock][curpos];
         assert(ptr != NULL);
-        for (j=0; j<cursize; j++) {
-            if (ptr[j] == (unsigned char) i) {
+        for (j = 0; j < cursize; j++) {
+            if (ptr[j] == (unsigned char) i)
                 continue;
-            }
             print("malloctest2: failed on object %u size %u\n",
-                    i, cursize);
+                  i, cursize);
             print("malloctest2: pos %u in pointer block %u\n",
-                    curpos, curblock);
+                  curpos, curblock);
             print("malloctest2: at object offset %u\n", j);
             print("malloctest2: expected 0x%x, found 0x%x\n",
-                    ptr[j], (unsigned char) i);
+                  ptr[j], (unsigned char) i);
             panic("malloctest2: failed.\n");
         }
         kfree(ptr);
         curpos++;
-        if (curpos >= blocksize / sizeof(void *)) {
+        if (curpos >= blocksize / sizeof(void*)) {
             curblock++;
             curpos = 0;
         }
@@ -201,7 +194,7 @@ malloctester(unsigned numptrs) {
     }
     assert(totalsize == 0);
 
-    for (i=0; i<numptrblocks; i++) {
+    for (i = 0; i < numptrblocks; i++) {
         assert(ptrblocks[i] != NULL);
         kfree(ptrblocks[i]);
     }
@@ -212,11 +205,11 @@ malloctester(unsigned numptrs) {
 }
 
 int
-malloctest2(int argc, char **argv) {
+malloctest2(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    for (int i = 0; i < 16; ++i)
+    for (int i = 0; i < 32; ++i)
         malloctester(random() % 8192 + 8192);
 
     return 0;

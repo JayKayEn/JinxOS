@@ -30,9 +30,8 @@ spinlock_acquire(struct spinlock* lk) {
 
     iflag = cli();
 
-    while (xchg(&lk->locked, 1) != 0) {
+    while (xchg(&lk->locked, 1) != 0)
         asm volatile ("pause");
-    }
 
     if (thiscpu != NULL) {
         lk->cpu = thiscpu;

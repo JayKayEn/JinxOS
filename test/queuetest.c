@@ -6,7 +6,7 @@
 #define TESTSIZE 133
 
 int
-queuetest(int nargs, char **args) {
+queuetest(int nargs, char** args) {
     (void)nargs;
     (void)args;
 

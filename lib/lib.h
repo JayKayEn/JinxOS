@@ -25,7 +25,7 @@ typedef uint32_t              size_t;
 
 #endif // _TYPES_
 
-int atoi(const char *s);
+int atoi(const char* s);
 char getc(void);
 void putc(const char c);
 void puts(const char* text);

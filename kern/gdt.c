@@ -2,7 +2,14 @@
 #include <gcc.h>
 #include <gdt.h>
 
-#define GDT_ENTRIES 5
+enum {
+    GDT_NULL,
+    GDT_KCODE,
+    GDT_KDATA,
+    GDT_UCODE,
+    GDT_UDATA,
+    GDT_ENTRIES
+};
 
 struct gdt_entry {
     uint16_t limit_lo;
@@ -19,12 +26,6 @@ struct gdt_ptr {
 } PACKED;
 
 struct gdt_entry gdt[GDT_ENTRIES];
-
-/*
- * This is in start.asm. We use this to properly reload
- * the new segment registers
- */
-extern void gdt_flush();
 
 /*
  * Setup a descriptor in the Global Descriptor Table.
@@ -60,18 +61,10 @@ void gdt_set_gate(uint8_t num, uint32_t base, uint32_t limit, uint8_t access,
     gdt[num].access = access;
 }
 
-enum {
-    GDT_NULL,
-    GDT_KCODE,
-    GDT_KDATA,
-    GDT_UCODE,
-    GDT_UDATA,
-};
-
 struct gdt_ptr gp;
 
 void init_gdt(void) {
-    gp.limit = (sizeof(struct gdt_entry) * GDT_ENTRIES) - 1;
+    gp.limit = sizeof(struct gdt_entry) * GDT_ENTRIES - 1;
     gp.base = (uint32_t) &gdt;
 
     gdt_set_gate(GDT_NULL,  0, 0x00000000, 0x00, 0x00);
@@ -80,5 +73,6 @@ void init_gdt(void) {
     gdt_set_gate(GDT_UCODE, 0, 0xBFFFFFFF, 0xFA, 0xCF);
     gdt_set_gate(GDT_UDATA, 0, 0xBFFFFFFF, 0xF2, 0xCF);
 
-    gdt_flush();    // asm.c
+    extern void gdt_flush();    // in asm.S
+    gdt_flush();
 }

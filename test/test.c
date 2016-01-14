@@ -6,34 +6,43 @@ static const struct test {
     int (*func)(int argc, char* argv[]);
 } tests[] = {
     { "all", alltests },
+
     { "array", arraytest },
-    { "bitmap", bitmaptest },
-    { "cv", cvtest },
-    { "hashtable", hashtabletest },
     { "heap", heaptest },
+    { "bitmap", bitmaptest },
     { "list", listtest },
-    { "lock", locktest },
-    { "malloc", malloctest },
+    { "queue", queuetest },
+    { "hashtable", hashtabletest },
+
+    { "malloc1", malloctest },
     { "malloc2", malloctest2 },
     { "malloc3", mallocstress },
-    { "queue", queuetest },
+
+    { "cv", cvtest },
+    { "lock", locktest },
+
     { "threadlist", threadlisttest },
+
     { "thread1", threadtest },
     { "thread2", threadtest2 },
     { "thread3", threadtest3 },
     { "thread4", threadtest4 },
+    { "thread5", threadtest5 },
+
     { "x", extreme }
 };
+
+static const size_t ntests = ARRAY_SIZE(tests);
 
 int test_suite(int argc, char* argv[]) {
     if (argc == 1) {
         print("test options:\n");
-        for (size_t i = 0; i < ARRAY_SIZE(tests); i++)
-            print("\t%s\n", tests[i].name);
+        for (size_t i = 0; i < ntests - 1; i++)
+            print("\t > %s\n", tests[i].name);
         return 0;
     }
 
-    static const size_t ntests = ARRAY_SIZE(tests);
+
     for (size_t i = 0; i < ntests; i++)
         if (strcmp(argv[1], tests[i].name) == 0)
             return tests[i].func(argc, argv);
@@ -45,8 +54,7 @@ int test_suite(int argc, char* argv[]) {
 
 int
 alltests(int argc, char* argv[]) {
-    static const size_t ntests = ARRAY_SIZE(tests) - 1; // no extreme
-    for (size_t i = 1; i < ntests; i++) {
+    for (size_t i = 1; i < ntests - 1; i++) {  // no extreme()
         print("\n");
         tests[i].func(argc, argv);
     }
@@ -56,7 +64,12 @@ alltests(int argc, char* argv[]) {
 
 int
 extreme(int argc, char* argv[]) {
-    for (int i = 0; i < 128; ++i)
-        mallocstress(argc, argv);
+    print("\nStarting randomized testing...\n");
+    for (int i = 0; i < 1024; ++i) {
+        size_t test = (random() % (ntests - 2)) + 1;
+        print("\n");
+        tests[test].func(argc, argv);
+    }
+    print("Finished randomized testing...\n");
     return 0;
 }

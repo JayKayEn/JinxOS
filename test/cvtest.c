@@ -178,7 +178,7 @@ int test_cv_broadcast() {
 }
 
 int
-cvtest(int argc, char **argv) {
+cvtest(int argc, char** argv) {
     (void) argc;
     (void) argv;
 

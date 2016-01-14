@@ -10,11 +10,11 @@ int
 int_comparator(void* left, void* right) {
     int l = *(int*)left;
     int r = *(int*)right;
-    return l-r;
+    return l - r;
 }
 
 int
-listtest(int nargs, char **args) {
+listtest(int nargs, char** args) {
     (void)nargs;
     (void)args;
 

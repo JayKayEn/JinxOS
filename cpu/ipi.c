@@ -14,8 +14,7 @@ struct tlbshootdown {
 };
 
 void
-ipi_send(struct cpu *target, int code)
-{
+ipi_send(struct cpu* target, int code) {
     assert(code >= 0 && code < 32);
 
     spinlock_acquire(&target->ipi_lock);
@@ -25,8 +24,7 @@ ipi_send(struct cpu *target, int code)
 }
 
 void
-ipi_broadcast(int code)
-{
+ipi_broadcast(int code) {
     for (size_t i = 0; i < ncpu; i++)
         if (cpus[i] != thiscpu->self)
             ipi_send(cpus[i], code);
@@ -55,8 +53,7 @@ ipi_broadcast(int code)
 // }
 
 void
-interprocessor_interrupt(void)
-{
+interprocessor_interrupt(void) {
     spinlock_acquire(&thiscpu->ipi_lock);
     uint32_t bits = thiscpu->ipi_pending;
 

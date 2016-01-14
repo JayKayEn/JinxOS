@@ -13,7 +13,7 @@ static int int_lessthan(const void* left, const void* right) {
 }
 
 int
-heaptest(int nargs, char **args) {
+heaptest(int nargs, char** args) {
     (void)nargs;
     (void)args;
 

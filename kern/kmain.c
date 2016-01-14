@@ -31,29 +31,29 @@ uint32_t bpgd[TBL_SIZE] PAGE_ALIGNED = {
     // [PDX(KADDR) + 5] = 0x1400000 | PG_P | PG_W | PG_PS,
 };
 
-static void jinx() {
-    static const char* title[] = {
-        "\t\t          _/  _/                               _/_/      _/_/_/\n",
-        "\t\t         _/      _/_/_/    _/    _/         _/    _/  _/       \n",
-        "\t\t        _/  _/  _/    _/    _/_/           _/    _/    _/_/    \n",
-        "\t\t _/    _/  _/  _/    _/  _/    _/         _/    _/        _/   \n",
-        "\t\t  _/_/    _/  _/    _/  _/    _/           _/_/    _/_/_/      \n",
-    };
+// static void jinx() {
+//     static const char* title[] = {
+//         "\t\t          _/  _/                               _/_/      _/_/_/\n",
+//         "\t\t         _/      _/_/_/    _/    _/         _/    _/  _/       \n",
+//         "\t\t        _/  _/  _/    _/    _/_/           _/    _/    _/_/    \n",
+//         "\t\t _/    _/  _/  _/    _/  _/    _/         _/    _/        _/   \n",
+//         "\t\t  _/_/    _/  _/    _/  _/    _/           _/_/    _/_/_/      \n",
+//     };
 
-    print("\n");
-    for (int i = 0, k = 0; i < 5; ++i, k = 0) {
-        for (int j = 0; j < 6 - i; ++j, ++k)    // whitespace
-            putc(title[i][k]);
-        settextcolor(VGA_DGREEN);
-        for (int j = 0; j < 32; ++j, ++k)       // "Jinx"
-            putc(title[i][k]);
-        settextcolor(VGA_DGREY);
-        for (int j = 0; j < 27; ++j, ++k)       // "OS"
-            putc(title[i][k]);
-        putc('\n');
-    }
-    settextcolor(VGA_NORMAL);
-}
+//     print("\n");
+//     for (int i = 0, k = 0; i < 5; ++i, k = 0) {
+//         for (int j = 0; j < 6 - i; ++j, ++k)    // whitespace
+//             putc(title[i][k]);
+//         settextcolor(VGA_DGREEN);
+//         for (int j = 0; j < 32; ++j, ++k)       // "Jinx"
+//             putc(title[i][k]);
+//         settextcolor(VGA_DGREY);
+//         for (int j = 0; j < 27; ++j, ++k)       // "OS"
+//             putc(title[i][k]);
+//         putc('\n');
+//     }
+//     settextcolor(VGA_NORMAL);
+// }
 
 void
 kmain(uint32_t eax, size_t ebx) {
@@ -99,8 +99,9 @@ kmain(uint32_t eax, size_t ebx) {
     // print("%08p\n", thisthread->context);
     // memset(thisthread->context, 0, sizeof(struct regs));
     // asm volatile (
+    //     "movl %0, %%ebp\n"
     //     "movl %0, %%esp\n"
-    //     "movl %%esp, %%ebp\n"
+
     //     "pushl $0\n"
     //     "pushl $0\n"
     //     : : "a" (thisthread->context)
@@ -113,7 +114,7 @@ kmain(uint32_t eax, size_t ebx) {
 
     // lock_kernel();
 
-    jinx();
+    // jinx();
 
     // print("thiscpu->cpuno: %u\n", thiscpu->cpuno);
     // print("thiscpu->apicid: %u\n", thiscpu->apicid);
@@ -121,7 +122,7 @@ kmain(uint32_t eax, size_t ebx) {
 
     // init_speaker();
 
-    for (;;) for (;;) for (;;)
+    for (;;)
         prompt();
 
     panic("no shutdown procedure in place");

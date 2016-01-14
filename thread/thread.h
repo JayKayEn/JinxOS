@@ -70,6 +70,7 @@ struct thread {
 DECLARRAY(thread);
 
 #define thisthread (thiscpu->thread)
+struct thread* bootthread;
 
 // Call once during system startup to allocate data structures.
 void thread_bootstrap(void);

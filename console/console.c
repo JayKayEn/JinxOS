@@ -70,7 +70,9 @@ static const struct cmd {
 extern int test_suite(int argc, char* argv[]);
 int
 cmd_test(int argc, char* argv[]) {
-    return test_suite(argc, argv);
+    test_suite(argc, argv);
+    sti();
+    return 0;
 }
 
 int

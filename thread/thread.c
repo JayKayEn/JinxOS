@@ -14,13 +14,14 @@
 #include <err.h>
 #include <switchframe.h>
 #include <debug.h>
+#include <syscall.h>
 
 DEFARRAY(thread, );
 
 static
 void
-thread_checkstack(struct thread *thread) {
-    assert(thread->stack != NULL);
+thread_checkstack(struct thread* thread) {
+    assert(thisthread == bootthread || thread->stack != NULL);
     assert(((uint32_t*) thread->stack)[0] = THREAD_STACK_MAGIC);
     assert(((uint32_t*) thread->stack)[1] = THREAD_STACK_MAGIC);
     assert(((uint32_t*) thread->stack)[2] = THREAD_STACK_MAGIC);
@@ -63,8 +64,8 @@ thread_create(const char* name) {
 
 int
 thread_fork(const char* name, struct thread** thread_out,
-        struct proc* proc, int (*entrypoint)(void*, unsigned long),
-        void* data1, unsigned long data2) {
+            struct proc* proc, int (*entrypoint)(void*, unsigned long),
+            void* data1, unsigned long data2) {
 
     struct thread* newthread = thread_create(name);
     if (newthread == NULL)
@@ -193,8 +194,8 @@ thread_yield(void) {
 }
 
 void
-thread_startup(int (*entrypoint)(void *data1, unsigned long data2),
-               void *data1, unsigned long data2) {
+thread_start(int (*entrypoint)(void* data1, unsigned long data2),
+               void* data1, unsigned long data2) {
     assert(thisthread != NULL);
 
     /* Clear the wait channel and set the thread state. */
@@ -206,19 +207,18 @@ thread_startup(int (*entrypoint)(void *data1, unsigned long data2),
     /* Activate our address space in the MMU. */
     // lcr3(PADDR(thisthread->page_directory));
 
-    /* Enable interrupts. */
-    // sti();
+    sti();
 
     int ret = entrypoint(data1, data2);
 
-    thread_exit(ret);
+    sys_exit(ret);
 }
 
 void
 thread_exit(int ret) {
     thisthread->rval = ret;
 
-    if(thisthread->parent != NULL) {
+    if (thisthread->parent != NULL) {
         V(thisthread->psem);
         P(thisthread->csem);
 
@@ -235,7 +235,7 @@ thread_exit(int ret) {
     assert(thisthread->proc == NULL);
 
     /* Interrupts off on thisthread processor */
-    cli();
+
     thread_switch(S_ZOMBIE, NULL, NULL);
 
     panic("thread_switch returned\n");
@@ -291,10 +291,6 @@ int thread_join(struct thread* thread, int* ret_out) {
     thread->parent = NULL;
 
     return 0;
-}
-
-void thread_start_cpus(void) {
-
 }
 
 void thread_panic(void) {

@@ -228,8 +228,10 @@ thread_start(int (*entrypoint)(void* data1, unsigned long data2),
 
     // cli();
 
-    // thread_exit(ret);
-    sys_exit(ret);
+    cli();
+    thread_exit(ret);
+
+    // sys_exit(ret);
 }
 
 void

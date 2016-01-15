@@ -209,7 +209,7 @@ malloctest2(int argc, char** argv) {
     (void) argv;
 
     for (int i = 0; i < 8; ++i)
-        malloctester(random() % 32768 + 32768);
+        malloctester(random() % 16384 + 16384);
 
     return 0;
 }

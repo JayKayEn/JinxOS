@@ -8,7 +8,7 @@
 #include <pmm.h>
 #include <thread.h>
 
-#define NSTACK 1024
+#define NSTACK 2048
 
 struct stack_registrar {
     struct lock* lk;                // for concurrency control w/o _ts struct

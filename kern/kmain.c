@@ -26,9 +26,8 @@ uint32_t bpgd[TBL_SIZE] PAGE_ALIGNED = {
     [PDX(KADDR)]     = 0x0       | PG_P | PG_W | PG_PS,
     [PDX(KADDR) + 1] = 0x400000  | PG_P | PG_W | PG_PS,
     [PDX(KADDR) + 2] = 0x800000  | PG_P | PG_W | PG_PS,
-    // [PDX(KADDR) + 3] = 0xC00000  | PG_P | PG_W | PG_PS,
-    // [PDX(KADDR) + 4] = 0x1000000 | PG_P | PG_W | PG_PS,
-    // [PDX(KADDR) + 5] = 0x1400000 | PG_P | PG_W | PG_PS,
+    [PDX(KADDR) + 3] = 0xC00000  | PG_P | PG_W | PG_PS,
+
 };
 
 // static void jinx() {
@@ -73,12 +72,12 @@ kmain(uint32_t eax, size_t ebx) {
     init_isr();
     init_irq();
     init_pit();
-
     init_kbd();
+
+    init_rand();
 
     init_mem();
     init_kmm();
-
     init_pmm();
     init_vmm();
 
@@ -92,33 +91,12 @@ kmain(uint32_t eax, size_t ebx) {
 
     init_proc();
 
-    init_rand();
-
-    // uint32_t stacktop = (uint32_t) thisthread->stack + STACK_SIZE;
-    // thisthread->context = (struct regs*) stacktop - 1;
-    // print("%08p\n", thisthread->context);
-    // memset(thisthread->context, 0, sizeof(struct regs));
-    // asm volatile (
-    //     "movl %0, %%ebp\n"
-    //     "movl %0, %%esp\n"
-
-    //     "pushl $0\n"
-    //     "pushl $0\n"
-    //     : : "a" (thisthread->context)
-    // );
-
     init_lapic();
 
     sti();
     hlt();
 
-    // lock_kernel();
-
     // jinx();
-
-    // print("thiscpu->cpuno: %u\n", thiscpu->cpuno);
-    // print("thiscpu->apicid: %u\n", thiscpu->apicid);
-    // print("thiscpu->status: %u\n", thiscpu->status);
 
     // init_speaker();
 

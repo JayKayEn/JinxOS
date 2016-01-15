@@ -33,7 +33,7 @@ loudthread(void* junk, unsigned long num) {
 
     (void)junk;
 
-    for (i = 0; i < 80; i++) {
+    for (i = 0; i < 40; i++) {
         putc(ch);
         for (int j = 0; j < 1000000; ++j);
         if ((random() % NTHREADS) % 5 == 0)

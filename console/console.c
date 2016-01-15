@@ -157,9 +157,12 @@ cmd_timestamp(int argc, char* argv[]) {
     (void) argv;
 
     uint64_t low = 0, high = 0;
-    asm volatile ("rdtsc\n"
-                  "movl %%eax, %0\n"
-                  "movl %%edx, %1\n" : "=r"(low), "=r"(high));
+    asm volatile (
+        "rdtsc\n"
+        "movl %%eax, %0\n"
+        "movl %%edx, %1\n"
+        : "=r"(low), "=r"(high)
+    );
     print("%llu\n", (uint64_t) (high << 32) | (low));
     return 0;
 }

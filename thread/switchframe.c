@@ -9,7 +9,6 @@ void
 switchframe_switch(struct regs* regs) {
     assert(regs != NULL);
 
-    // memory_barrier();
     asm volatile(
         "\tmovl     %0,%%esp\n"
         "\tpopl     %%ds\n"
@@ -25,7 +24,6 @@ switchframe_switch(struct regs* regs) {
 
 static void
 switchframe_start(void) {
-    // memory_barrier();
     asm volatile(
         "\tpushl    %%edx\n"
         "\tpushl    %%ecx\n"

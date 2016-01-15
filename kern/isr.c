@@ -141,8 +141,7 @@ void isr_handler(struct regs* r) {
 
     switch (r->int_no) {
         case ISR_SYSCALL: {
-            if (thiscpu && thisthread)
-                thisthread->context = r;
+            thisthread->context = r;
             uint32_t syscallno = r->eax;
             uint32_t arg1 = r->edx;
             uint32_t arg2 = r->ecx;
@@ -163,10 +162,12 @@ void isr_handler(struct regs* r) {
                 print("Unanticipated exception");
             print(" (%u).  System halted.\n\n", r->int_no);
 
-            if (r->int_no == 13)
+            if (r->int_no == 13) {
                 print_regs(thisthread->context);
-            else
-                print_regs(r);
+                print("\n");
+            }
+            print_regs(r);
+            print("\n");
 
             if (isr_routines[r->int_no] != NULL)
                 isr_routines[r->int_no](r);

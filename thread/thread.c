@@ -67,6 +67,8 @@ thread_fork(const char* name, struct thread** thread_out,
             struct proc* proc, int (*entrypoint)(void*, unsigned long),
             void* data1, unsigned long data2) {
 
+    bool on = cli();
+
     struct thread* newthread = thread_create(name);
     if (newthread == NULL)
         return ENOMEM;
@@ -113,11 +115,14 @@ thread_fork(const char* name, struct thread** thread_out,
 
     thread_make_runnable(newthread, false);
 
+    ifx(on);
+
     return 0;
 }
 
 void
 thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
+    assert(cli() == false);  // interrupts are off
     assert(thiscpu->thread == thisthread);
     assert(thisthread->cpu == thiscpu->self);
 
@@ -160,42 +165,49 @@ thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
             thisthread->wchan_name = "ZOMBIE";
             threadlist_addtail(&thiscpu->zombie_threads, thisthread);
             break;
+        default:
+            panic("unknown thread state in thread_switch: %u\n", newstate);
     }
     thisthread->state = newstate;
 
     thiscpu->status = CPU_IDLE;
     struct thread* next = NULL;
-    do {
-        next = threadlist_remhead(&thiscpu->active_threads);
-        if (next == NULL) {
+    do
+        if ((next = threadlist_remhead(&thiscpu->active_threads)) == NULL) {
             spinlock_release(&thiscpu->active_threads_lock);
             cpu_idle();
             spinlock_acquire(&thiscpu->active_threads_lock);
         }
-    } while (next == NULL);
-
+    while (next == NULL);
     thiscpu->status = CPU_STARTED;
+
     next->wchan_name = NULL;
     next->state = S_RUN;
-    thisthread = next;
 
     // lcr3(PADDR(thisthread->page_directory));
 
     spinlock_release(&thiscpu->active_threads_lock);
 
-    switchframe_switch(next->context);
+    if (next->context->es != 0x10) {
+        print_regs(next->context);
+        panic("corrupt next context: %x", next->context->es);
+    }
+
+    switchframe_switch((thisthread = next)->context);
 
     panic("switchframe_switch returned");
 }
 
 void
 thread_yield(void) {
+    assert(cli() == false);  // interrupts are off
     thread_switch(S_READY, NULL, NULL);
 }
 
 void
 thread_start(int (*entrypoint)(void* data1, unsigned long data2),
                void* data1, unsigned long data2) {
+    assert(cli() == false);  // interrupts are off
     assert(thisthread != NULL);
 
     /* Clear the wait channel and set the thread state. */
@@ -209,13 +221,20 @@ thread_start(int (*entrypoint)(void* data1, unsigned long data2),
 
     sti();
 
+    while (random() & 0x3)
+        sys_yield();
+
     int ret = entrypoint(data1, data2);
 
+    // cli();
+
+    // thread_exit(ret);
     sys_exit(ret);
 }
 
 void
 thread_exit(int ret) {
+    assert(cli() == false);  // interrupts are off
     thisthread->rval = ret;
 
     if (thisthread->parent != NULL) {
@@ -234,7 +253,7 @@ thread_exit(int ret) {
     proc_remthread(thisthread);
     assert(thisthread->proc == NULL);
 
-    /* Interrupts off on thisthread processor */
+    thread_checkstack(thisthread);
 
     thread_switch(S_ZOMBIE, NULL, NULL);
 
@@ -243,6 +262,7 @@ thread_exit(int ret) {
 
 void
 thread_destroy(struct thread* thread) {
+    assert(cli() == false);  // interrupts are off
     assert(thread != thisthread);
     assert(thread->state != S_RUN);
     assert(thread->proc == NULL);
@@ -262,12 +282,11 @@ thread_destroy(struct thread* thread) {
 
 void
 thread_exorcise(void) {
+    assert(cli() == false);  // interrupts are off
     struct thread* thread;
 
     while ((thread = threadlist_remhead(&thiscpu->zombie_threads)) != NULL) {
         assert(thread != NULL);
-        // if (thread == thisthread)
-        //     continue;
         assert(thread != thisthread);
         assert(thread->state == S_ZOMBIE);
         thread_destroy(thread);
@@ -278,6 +297,8 @@ int thread_join(struct thread* thread, int* ret_out) {
     assert(thread != NULL);
     assert(ret_out != NULL);
     assert(thread->parent != NULL);
+
+    bool on = cli();
 
     if (thread == thisthread)
         return EDEADLK;
@@ -290,10 +311,27 @@ int thread_join(struct thread* thread, int* ret_out) {
     *ret_out = thread->rval;
     thread->parent = NULL;
 
+    ifx(on);
+
     return 0;
 }
 
 void thread_panic(void) {
+
+    // // Kill off other CPUs.
+    // // We could wait for them to stop, except that they might not.
+    // ipi_broadcast(IPI_PANIC);
+
+    /*
+     * Drop runnable threads on the floor.
+     *
+     * Don't try to get the run queue lock; we might not be able
+     * to.  Instead, blat the list structure by hand, and take the
+     * risk that it might not be quite atomic.
+     */
+    thiscpu->active_threads.tl_count = 0;
+    thiscpu->active_threads.tl_head.tln_next = &thiscpu->active_threads.tl_tail;
+    thiscpu->active_threads.tl_tail.tln_prev = &thiscpu->active_threads.tl_head;
 
 }
 
@@ -303,6 +341,8 @@ void thread_shutdown(void) {
 
 void
 thread_make_runnable(struct thread* thread, bool holding_lock) {
+    bool on = cli();
+
     struct cpu* cpu = thread->cpu;
 
     thread->state = S_READY;
@@ -325,4 +365,6 @@ thread_make_runnable(struct thread* thread, bool holding_lock) {
 
     if (!holding_lock)
         spinlock_release(&cpu->active_threads_lock);
+
+    ifx(on);
 }

@@ -6,8 +6,7 @@
 #include <debug.h>
 #include <lapic.h>
 
-#define PIT_DEFAULT  10000
-// #define PIT_DEFAULT 18.222
+#define PIT_DEFAULT 10000
 #define YIELD_MOD   1
 
 static volatile uint32_t nticks;
@@ -42,7 +41,6 @@ void irq_handler_pit(struct regs* r) {
 
     if (++nticks % YIELD_MOD == 0) {
         thisthread->context = r;
-        // memcpy(thisthread->context, r, sizeof(struct regs));
         thread_yield();
     }
 }

@@ -4,8 +4,6 @@
 #include <mm.h>
 #include <spinlock.h>
 
-struct spinlock mm_lock;
-
 struct block {
     size_t sizeAndTags;
     struct block* next;
@@ -52,8 +50,6 @@ void init_mm() {
     *((size_t*) SUB(mem_heap_hi(), WORD_SIZE - 1)) = BLOCK_USED;
 
     FREE_LIST_HEAD = first_free_block;
-
-    spinlock_init(&mm_lock);
 }
 
 /* Find a free block of the requested size in the free list.  Returns
@@ -260,10 +256,10 @@ void* kmalloc(size_t size) {
     if (size == 0)
         return NULL;
 
+    spinlock_acquire(&mem_lock);
+
     // Ensure a valid and aligned size
     size_t alloc_size = valid_size(size);
-
-    spinlock_acquire(&mm_lock);
 
     // Search free list for a suitable block.
     struct block* block = find_free_block(alloc_size);
@@ -285,7 +281,7 @@ void* kmalloc(size_t size) {
         *(size_t*) ADD(block, block_size) |= PREV_BLOCK_USED;
     }
 
-    spinlock_release(&mm_lock);
+    spinlock_release(&mem_lock);
 
     // Return a pointer to the start of the payload
     return ADD(block, WORD_SIZE);
@@ -295,14 +291,14 @@ void kfree(void* ptr) {
     if (ptr == NULL)
         return;
 
-    spinlock_acquire(&mm_lock);
+    spinlock_acquire(&mem_lock);
 
     // If the block is in a BLOCK_IS_USED state, treat it all as surplus and free
     struct block* block = (struct block*) SUB(ptr, WORD_SIZE);
     if (BLOCK_IS_USED(block))
         free_block(block, SIZE(block->sizeAndTags), 0);
 
-    spinlock_release(&mm_lock);
+    spinlock_release(&mem_lock);
 }
 
 void* krealloc(void* ptr, size_t size) {
@@ -315,7 +311,7 @@ void* krealloc(void* ptr, size_t size) {
         return NULL;
     }
 
-    spinlock_acquire(&mm_lock);
+    spinlock_acquire(&mem_lock);
 
     // Get header and size of the block.
     struct block* block = (struct block*) SUB(ptr, WORD_SIZE);
@@ -343,7 +339,7 @@ void* krealloc(void* ptr, size_t size) {
             free_block(block, block_size, alloc_size);
         }
 
-        spinlock_release(&mm_lock);
+        spinlock_release(&mem_lock);
 
         return ADD(block, WORD_SIZE);
     }
@@ -355,7 +351,7 @@ void* krealloc(void* ptr, size_t size) {
         // Need to create a new heap footer
         *((size_t*) SUB(mem_heap_hi(), WORD_SIZE - 1)) = PREV_BLOCK_USED | BLOCK_USED;
 
-        spinlock_release(&mm_lock);
+        spinlock_release(&mem_lock);
 
         return ADD(block, WORD_SIZE);
     }
@@ -377,7 +373,7 @@ void* krealloc(void* ptr, size_t size) {
                 *(size_t*) ADD(block, size) |= PREV_BLOCK_USED;
             }
 
-            spinlock_release(&mm_lock);
+            spinlock_release(&mem_lock);
 
             return ADD(block, WORD_SIZE);
         }
@@ -390,7 +386,7 @@ void* krealloc(void* ptr, size_t size) {
             // Need to create a new heap footer
             *((size_t*) SUB(mem_heap_hi(), WORD_SIZE - 1)) = PREV_BLOCK_USED | BLOCK_USED;
 
-            spinlock_release(&mm_lock);
+            spinlock_release(&mem_lock);
 
             return ADD(block, WORD_SIZE);
         }
@@ -415,7 +411,7 @@ void* krealloc(void* ptr, size_t size) {
                 *(size_t*) ADD(prev_block, size) |= PREV_BLOCK_USED;
             }
 
-            spinlock_release(&mm_lock);
+            spinlock_release(&mem_lock);
 
             return ADD(prev_block, WORD_SIZE);
         }
@@ -437,7 +433,7 @@ void* krealloc(void* ptr, size_t size) {
                 *(size_t*) ADD(prev_block, size) |= PREV_BLOCK_USED;
             }
 
-            spinlock_release(&mm_lock);
+            spinlock_release(&mem_lock);
 
             return ADD(prev_block, WORD_SIZE);
         }
@@ -450,7 +446,7 @@ void* krealloc(void* ptr, size_t size) {
     copy_payload(block, new_block);
     kfree(ADD(block, WORD_SIZE));
 
-    spinlock_release(&mm_lock);
+    spinlock_release(&mem_lock);
 
     return ADD(new_block, WORD_SIZE);
 

@@ -28,6 +28,8 @@ static const struct test {
     { "thread3", threadtest3 },
     { "thread4", threadtest4 },
     { "thread5", threadtest5 },
+    { "thread6", threadtest6 },
+    { "thread7", threadtest7 },
 
     { "x", extreme }
 };
@@ -42,7 +44,7 @@ int test_suite(int argc, char* argv[]) {
         return 0;
     }
 
-
+    print("\n");
     for (size_t i = 0; i < ntests; i++)
         if (strcmp(argv[1], tests[i].name) == 0)
             return tests[i].func(argc, argv);
@@ -64,11 +66,12 @@ alltests(int argc, char* argv[]) {
 
 int
 extreme(int argc, char* argv[]) {
-    print("\nStarting randomized testing...\n");
+    print("\nStarting randomized testing...\n\n");
     for (int i = 0; i < 1024; ++i) {
         size_t test = (random() % (ntests - 2)) + 1;
-        print("\n");
+        print("%d: \n", i);
         tests[test].func(argc, argv);
+        print("\n");
     }
     print("Finished randomized testing...\n");
     return 0;

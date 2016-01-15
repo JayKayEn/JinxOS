@@ -4,8 +4,7 @@
 #include <err.h>
 #include <mm.h>
 #include <spinlock.h>
-
-struct spinlock kmm_lock;
+#include <memlib.h>
 
 extern size_t kbrk_max;
 size_t _kbrk;
@@ -16,18 +15,18 @@ init_kmm(void) {
     _kbrk = kbrk_max;
     kbrk_max = ROUNDDOWN(kbrk_max, PG_SIZE);
 
-    spinlock_init(&kmm_lock);
+    spinlock_init(&mem_lock);
 }
 
 void*
 kalign(size_t nbytes) {
-    spinlock_acquire(&kmm_lock);
+    spinlock_acquire(&mem_lock);
 
     size_t kptr = ROUNDDOWN(kbrk_max - nbytes, PG_SIZE);
     kbrk_max = kptr;
     memset((void*) kptr, 0, nbytes);
 
-    spinlock_release(&kmm_lock);
+    spinlock_release(&mem_lock);
 
     return (void*) (kptr);
 }

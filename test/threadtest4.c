@@ -226,13 +226,7 @@ int
 threadtest4(int argc, char** argv) {
     (void) argc;
     (void) argv;
-    runtest4(1, 1);
-    runtest4(5, 2);
-    runtest4(3, 12);
-    runtest4(13, 7);
-    runtest4(23, 13);
-    runtest4(31, 47);
-    runtest4(111, 71);
+    runtest4(random() % 32 + 1, random() % 32 + 1);
     print("\nThread test 4 done\n");
     sti();
     return 0;

@@ -7,7 +7,7 @@
 #include <pmm.h>
 #include <x86.h>
 
-#define DIVROUNDUP(a,b) (((a)+(b)-1)/(b))
+#define DIVROUNDUP(a, b) (((a) + (b) - 1 ) / (b))
 
 /*
  * Test kmalloc; allocate ITEMSIZE bytes NTRIES times, freeing
@@ -22,19 +22,17 @@
 
 #define NTRIES   1200
 #define ITEMSIZE  997
-#define NTHREADS  64
+#define NTHREADS  256
 
 static
 int
 mallocthread(void* sm, unsigned long num) {
     struct semaphore* sem = sm;
-    void* ptr;
     void* oldptr = NULL;
     void* oldptr2 = NULL;
-    int i;
 
-    for (i = 0; i < NTRIES; i++) {
-        ptr = kmalloc(ITEMSIZE);
+    for (int i = 0; i < NTRIES; i++) {
+        void* ptr = kmalloc(ITEMSIZE);
         if (ptr == NULL) {
             if (sem) {
                 print("thread %lu: kmalloc returned NULL\n",
@@ -67,7 +65,9 @@ malloctest(int argc, char** argv) {
     (void)argv;
 
     print("Starting kmalloc test...\n");
+
     mallocthread(NULL, 0);
+
     print("kmalloc test done\n");
 
     return 0;
@@ -88,8 +88,7 @@ mallocstress(int argc, char** argv) {
     print("Starting kmalloc stress test...\n");
 
     for (i = 0; i < NTHREADS; i++) {
-        result = thread_fork("mallocstress", NULL, NULL,
-                             mallocthread, sem, i);
+        result = thread_fork("mallocstress", NULL, NULL, mallocthread, sem, i);
         if (result)
             panic("mallocstress: thread_fork failed\n");
     }
@@ -209,8 +208,8 @@ malloctest2(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    for (int i = 0; i < 32; ++i)
-        malloctester(random() % 8192 + 8192);
+    for (int i = 0; i < 8; ++i)
+        malloctester(random() % 32768 + 32768);
 
     return 0;
 }

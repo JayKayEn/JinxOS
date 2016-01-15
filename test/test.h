@@ -28,6 +28,9 @@ int threadtest2(int argc, char* argv[]);
 int threadtest3(int argc, char* argv[]);
 int threadtest4(int argc, char* argv[]);
 int threadtest5(int argc, char* argv[]);
+int threadtest6(int argc, char* argv[]);
+int threadtest7(int argc, char* argv[]);
+
 int semtest(int argc, char* argv[]);
 int locktest(int argc, char* argv[]);
 int cvtest(int argc, char* argv[]);

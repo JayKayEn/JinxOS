@@ -1,6 +1,9 @@
 #include <lib.h>
+#include <spinlock.h>
 
-#define MAX_HEAP (4 * (1 << 20))
+struct spinlock mem_lock;
+
+#define MAX_HEAP (8 * (1 << 20))
 
 void init_mem(void);
 void mem_deinit(void);

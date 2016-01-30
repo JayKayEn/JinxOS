@@ -96,20 +96,16 @@ kmain(uint32_t eax, size_t ebx) {
 
     jinx();
 
+    proc_binary(user_hello);
+
     sti();
     hlt();
 
-    cli();
     // init_speaker();
-
-    // proc_binary(user_hello);
-
-    sti();
-    hlt();
 
     // thread_yield();
 
-    // print("userspace programs exited.\n");
+    print("userspace programs exited.\n");
 
     for (;;)
         prompt();

@@ -26,12 +26,12 @@ struct proc {
     struct spinlock lock;           // Lock for this structure
     struct threadarray threads;     // Threads in this process
 
-    struct pde* page_directory;
+    struct pde* page_directory;     //
 
     int pid;                        // the process ID of the current process
 
-    struct list* child_procs;         // list with all child processes
-    struct lock* child_lock;    // lock for child process list
+    struct list* child_procs;       // list with all child processes
+    struct lock* child_lock;        // lock for child process list
     struct proc* parent;            // parent process if not exists NULL
     int rval;                       // in case of waitpid to store return value
 

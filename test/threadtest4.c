@@ -106,7 +106,7 @@ waker_thread(void* junk1, unsigned long junk2) {
             wchan_wakeall(wc, lk);
             spinlock_release(lk);
 
-            sys_yield();
+            thread_yield();
         }
     }
     V(donesem);
@@ -174,7 +174,7 @@ compute_thread(void* junk1, unsigned long num) {
             tot += m3->m[ii][ii];
 
         print("{%lu: %u}", num, (unsigned) tot);
-        sys_yield();
+        thread_yield();
     }
 
     kfree(m1);

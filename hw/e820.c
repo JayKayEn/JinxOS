@@ -6,46 +6,6 @@
 struct multiboot_info* mbi;
 struct e820_map e820_map;
 
-static const char* e820_map_types[] = {
-    "available",
-    "reserved",
-    "reclaimable",
-    "acpi nvs",
-    "unusable",
-};
-
-void
-print_e820_mmap(void) {
-    print("\tE820: memory map [mem 0x%08x-0x%08x]\n", mbi->mmap_addr,
-          mbi->mmap_addr + mbi->mmap_length - 1);
-
-    for (size_t i = 0; i < e820_map.size; ++i) {
-        struct e820_e e820 = e820_map.entries[i];
-        print("\t\t[ %08p - %08p ] ", (size_t) e820.addr,
-              (size_t) (e820.addr + e820.len - 1));
-        switch (e820.type) {
-            case E820_AVAILABLE:
-                settextcolor(VGA_GREEN);
-                break;
-            case E820_RESERVED:
-            case E820_ACPI_NVS:
-            case E820_UNUSABLE:
-                settextcolor(VGA_RED);
-                break;
-            case E820_RECLAIMABLE:
-                settextcolor(VGA_CYAN);
-                break;
-            default:
-                panic("unknown region type %u", e820.type);
-                break;
-        }
-        print(e820_map_types[e820.type - 1]);
-        settextcolor(VGA_NORMAL);
-        print("\n");
-
-    }
-}
-
 void
 init_e820(size_t mbi_addr) {
     mbi = (struct multiboot_info*) mbi_addr;

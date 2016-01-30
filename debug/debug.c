@@ -3,11 +3,19 @@
 #include <stab.h>
 #include <int.h>
 #include <x86.h>
+#include <vmm.h>
 
-extern const struct stab _sym_table[];  // Beginning of stabs table
-extern const struct stab _esym_table[];    // End of stabs table
-extern const char _stab_strs[];      // Beginning of string table
-extern const char _estab_strs[];        // End of string table
+extern const struct stab _stab[];  // Beginning of stabs table
+extern const struct stab _estab[];    // End of stabs table
+extern const char _stabstr[];      // Beginning of string table
+extern const char _estabstr[];        // End of string table
+
+struct ustab {
+    const struct stab* stabs;
+    const struct stab* stab_end;
+    const char* stabstr;
+    const char* stabstr_end;
+};
 
 
 // stab_binsearch(stabs, region_left, region_right, type, addr)
@@ -115,14 +123,18 @@ debuginfo_eip(size_t addr, struct debuginfo* info) {
 
     // Find the relevant set of stabs
     if (addr >= 0xbf800000) {
-        stabs = _sym_table;
-        stab_end = _esym_table;
-        stabstr = _stab_strs;
-        stabstr_end = _estab_strs;
+        stabs = _stab;
+        stab_end = _estab;
+        stabstr = _stabstr;
+        stabstr_end = _estabstr;
     } else {
         // Can't search for user-level addresses yet!
         // backtrace();
-        panic("Invalid address: %08p", addr);
+        const struct ustab* ustab = (const struct ustab*) USTABDATA;
+        stabs = ustab->stabs;
+        stab_end = ustab->stab_end;
+        stabstr = ustab->stabstr;
+        stabstr_end = ustab->stabstr_end;
     }
 
     // String table validity checks
@@ -208,13 +220,13 @@ debuginfo_eip(size_t addr, struct debuginfo* info) {
 }
 
 void
-backtrace_regs(struct regs* regs) {
+backtrace_regs(struct trapframe* regs) {
     uint32_t _ebp[2] = { regs->ebp, regs->eip };
     uint32_t* ebp = (uint32_t*) &_ebp;
 
     print("Stack backtrace:\n");
-    char* file = NULL;
-    while(ebp != NULL && strcmp(file, "<unknown>")) {
+    // char* file = NULL;
+    while(ebp != NULL) {
         struct debuginfo info;
         debuginfo_eip(ebp[1], &info);
         print("\tebp %08x eip %08x args[%u]",
@@ -226,7 +238,7 @@ backtrace_regs(struct regs* regs) {
               info.dbg_file, info.dbg_line,
               info.dbg_fn_namelen, info.dbg_fn_name);
         ebp = (uint32_t*) ebp[0];
-        file = (char*) info.dbg_file;
+        // file = (char*) info.dbg_file;
     }
 }
 
@@ -235,8 +247,8 @@ backtrace(void) {
     uint32_t* ebp = (uint32_t*) read_ebp();
 
     print("Stack backtrace:\n");
-    char* file = NULL;
-    while(ebp != NULL && strcmp(file, "<unknown>")) {
+    // char* file = NULL;
+    while(ebp != NULL) {
         struct debuginfo info;
         debuginfo_eip(ebp[1], &info);
         print("\tebp %08x eip %08x args[%u]",
@@ -248,12 +260,12 @@ backtrace(void) {
               info.dbg_file, info.dbg_line,
               info.dbg_fn_namelen, info.dbg_fn_name);
         ebp = (uint32_t*) ebp[0];
-        file = (char*) info.dbg_file;
+        // file = (char*) info.dbg_file;
     }
 }
 
 void
-print_regs(struct regs* r) {
+print_regs(struct trapframe* r) {
     if (r == NULL)
         print("NULL");
     else {

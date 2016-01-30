@@ -18,7 +18,7 @@ struct debuginfo {
 
 int debuginfo_eip(size_t eip, struct debuginfo* info);
 void backtrace(void);
-void backtrace_regs(struct regs* regs);
-void print_regs(struct regs* r);
+void backtrace_regs(struct trapframe* regs);
+void print_regs(struct trapframe* r);
 
 #endif // _DEBUG_H_

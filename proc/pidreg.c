@@ -1,27 +1,24 @@
 #include <lib.h>
 #include <kmm.h>
-#include <err.h>
+#include <errno.h>
 #include <bitmap_ts.h>
 #include <queue_ts.h>
 #include <lock.h>
 #include <proc.h>
 #include <pidreg.h>
 
-#define NPID    ((int) BIT(15))
-#define PID_MIN 0
+#define NPID    NPROC
+#define PID_MIN 1       // PID 0 goes to the boot process
 
 struct pid_registrar {
-    struct lock* lk;                // for concurrency control w/o _ts struct
-    struct bitmap_ts* pmap;         // mark which pids are in use
-    struct queue_ts* pid_reuse;     // store pids no longer in use
-    int pcounter;                   // determines next new pid
+    struct lock* lk;
+    struct bitmap_ts* pmap;
+    struct queue_ts* pid_reuse;
+    int pcounter;
 };
 
 struct pid_registrar* kpidreg;
 
-/*
- * Create a pid_registrar structure for the system
- */
 void pidreg_create(void) {
     struct pid_registrar* pidreg = kmalloc(sizeof(struct pid_registrar));
     if (pidreg == NULL)

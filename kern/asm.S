@@ -2,9 +2,9 @@
 
     .code32
     .global gdt_flush
-    .extern gp
+    .extern gdt_addr
 gdt_flush:
-    lgdt    (gp)
+    lgdt    (gdt_addr)
     movw    $0x10, %ax
     movw    %ax ,%ds
     movw    %ax ,%es
@@ -13,13 +13,6 @@ gdt_flush:
     movw    %ax ,%ss
     ljmp    $0x08, $flush
 flush:
-    ret
-
-// lidt
-    .global lidt
-    .extern idtp
-lidt:
-    lidt (idtp)
     ret
 
 // Interrupt Service Routines (ISRs)

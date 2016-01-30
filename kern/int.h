@@ -4,10 +4,8 @@
 #include <lib.h>
 
 #define FL_IF   0x200   // Interrupt Flag
-#define GD_KT   0x08    // kernel text
-#define GD_KD   0x10    // kernel data
 
-struct regs {
+struct trapframe {
     uint32_t es;
     uint32_t ds;
     uint32_t edi;
@@ -27,8 +25,11 @@ struct regs {
     uint32_t ss;
 };
 
-extern void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
-extern void irq_install_handler(int, void (*)(struct regs*));
+void idt_set_gate(uint8_t num, bool istrap, uint16_t sel, uint32_t off, uint8_t dpl);
+extern void irq_install_handler(int, void (*)(struct trapframe*));
+
+void
+idt_set_gate2(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
 
 #define ISR_DIVIDE   0x00     // Divide Error
 #define ISR_DEBUG    0x01     // Debug Exception

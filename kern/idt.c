@@ -1,15 +1,28 @@
 #include <int.h>
 #include <lib.h>
+#include <x86.h>
+#include <gdt.h>
 
 #define IDT_ENTRIES 256
 
 /* Defines an IDT entry */
+// struct idt_entry {
+//     uint16_t base_lo;
+//     uint16_t sel;
+//     uint8_t zero;           // 5 bits = (args == 0), 3 bits = reserved
+//     uint8_t flags;
+//     uint16_t base_hi;
+// };
+
 struct idt_entry {
-    uint16_t base_lo;
-    uint16_t sel;
-    uint8_t zero;           // 5 bits = (args == 0), 3 bits = reserved
-    uint8_t flags;
-    uint16_t base_hi;
+    uint16_t gd_off_15_0;   // low 16 bits of offset in segment
+    uint16_t gd_sel;        // segment selector
+    uint8_t  gd_zero;
+    uint8_t  gd_type : 4;        // type(STS_{TG,IG32,TG32})
+    uint8_t  gd_s : 1;           // must be 0 (system)
+    uint8_t  gd_dpl : 2;         // descriptor(meaning new) privilege level
+    uint8_t  gd_p : 1;           // Present
+    uint16_t gd_off_31_16;      // high bits of offset in segment
 };
 
 struct idt_ptr {
@@ -26,21 +39,33 @@ struct idt_ptr {
 struct idt_entry idt[IDT_ENTRIES] = {{0}};
 struct idt_ptr idtp;
 
-/* This exists in 'start.asm', and is used to load our IDT */
-extern void lidt(void);
+void
+idt_set_gate(uint8_t num, bool istrap, uint16_t sel, uint32_t off, uint8_t dpl) {
+    idt[num].gd_off_15_0  = (uint32_t) (off) & 0xffff;
+    idt[num].gd_sel       = (sel);
+    idt[num].gd_zero      = 0;
+    idt[num].gd_type      = (istrap) ? STS_TG32 : STS_IG32;
+    idt[num].gd_s         = 0;
+    idt[num].gd_dpl       = (dpl);
+    idt[num].gd_p         = 1;
+    idt[num].gd_off_31_16 = (uint32_t) (off) >> 16;
+}
 
-/* Use this function to set an entry in the IDT. Alot simpler
-*  than twiddling with the GDT ;) */
-void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags) {
+void
+idt_set_gate2(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags) {
     /* The interrupt routine's base address */
-    idt[num].base_lo = (base & 0xFFFF);
-    idt[num].base_hi = (base >> 16);
+    idt[num].gd_off_15_0 = (base & 0xFFFF);
+    idt[num].gd_off_31_16 = (base >> 16);
 
     /* The segment or 'selector' that this IDT entry will use
     *  is set here, along with any access flags */
-    idt[num].sel = sel;
-    idt[num].zero = 0;
-    idt[num].flags = flags;
+    idt[num].gd_sel = sel;
+    idt[num].gd_zero = 0;
+
+    idt[num].gd_type      = (flags & 0xF) ? STS_TG32 : STS_IG32;
+    idt[num].gd_s         = 0;
+    idt[num].gd_dpl       = (flags >> 5) & 3;
+    idt[num].gd_p         = (flags >> 7) & 1;
 }
 
 /* Installs the IDT */
@@ -51,5 +76,4 @@ void init_idt(void) {
 
     /* Clear out the entire IDT, initializing it to zeros */
     memset(&idt, 0, sizeof(struct idt_entry) * IDT_ENTRIES);
-    lidt();
 }

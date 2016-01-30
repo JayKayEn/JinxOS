@@ -1,6 +1,6 @@
 OBJDIRS += $(OBJDIR)/kern
 
-OBJS += $(OBJDIR)/kern/entry.o
+OBJS += $(OBJDIR)/kern/bsp_entry.o
 OBJS += $(OBJDIR)/kern/asm.o
 OBJS += $(OBJDIR)/kern/gdt.o
 OBJS += $(OBJDIR)/kern/idt.o

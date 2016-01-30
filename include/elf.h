@@ -3,7 +3,7 @@
 
 #include <lib.h>
 
-#define ELF_INFO 12             // ELF info bytes
+#define ELF_INFO 12               // ELF info bytes
 
 struct elf {
     uint32_t magic;               // ELF magic (ELF_MAGIC)

@@ -1,15 +1,54 @@
 #ifndef _VMM_H_
 #define _VMM_H_
 
+#ifndef __ASSEMBLER__
+
 #include <lib.h>
 #include <pmm.h>
 
+#endif // __ASSEMBLER__
+
 #define KADDR       (0xC0000000)
-#define KSTACKTOP   KADDR
+#define KSTACKTOP   (KADDR)
 #define KSTKSIZE    (8 * PG_SIZE)
 #define KSTKGAP     (8 * PG_SIZE)
 #define MMIOLIM     (KSTACKTOP - PT_SIZE)
 #define MMIOBASE    (MMIOLIM - PT_SIZE)
+
+
+#define ULIM        (MMIOBASE)
+
+/*
+ * User read-only mappings! Anything below here til UTOP are readonly to user.
+ * They are global pages mapped in at env allocation time.
+ */
+
+// User read-only virtual page table (see 'uvpt' below)
+#define UVPT        (ULIM - PT_SIZE)
+// Read-only copies of the Page structures
+#define UPAGES      (UVPT - PT_SIZE)
+// Read-only copies of the global env structures
+#define UENVS       (UPAGES - PT_SIZE)
+
+/*
+ * Top of user VM. User can manipulate VA from UTOP-1 and down!
+ */
+
+// Top of user-accessible VM
+#define UTOP        (UENVS)
+
+#define UXSTACKTOP  (UTOP)                // Top of one-page user exception stack
+#define USTACKTOP   (UTOP - 2 * PG_SIZE)   // one-page stack guard
+
+#define UMMIOBASE   0xB0000000
+#define UMMIOAHCI   UMMIOBASE
+
+#define UTEXT       (2 * PT_SIZE)
+#define UTEMP       ((void*) PT_SIZE)
+// #define PFTEMP      (UTEMP + PT_SIZE - PG_SIZE)
+#define USTABDATA   (PT_SIZE >> 1)
+
+ #ifndef __ASSEMBLER__
 
 void init_vmm(void);
 void* mmio_map(size_t pa, size_t size);
@@ -46,6 +85,12 @@ struct pde {
 
 struct pde* kpd;
 
+int page_insert(struct pde* pgdir, size_t pno, void* va, bool write, bool user);
+struct pte* pgdir_walk(struct pde* pd, void* va, bool write, bool user, bool alloc);
+
+struct pde* pgdir_create(void);
+void pgdir_delete(struct pde* pgdir);
+
 // #define PADDR(a)    (((size_t) a) - KADDR)
 
 #define PADDR(va) _paddr(__FILE__, __LINE__, (void*) va)
@@ -75,6 +120,8 @@ _vaddr(const char* file, int line, size_t pa) {
 
 #define PD_SHIFT    (TBL_NBITS + PG_NBITS)
 #define PDX(a)      (((size_t) (a) >> PD_SHIFT) & 0x3FF)
+
+#endif // __ASSEMBLER__
 
 #define PG_P     BIT(0)   // Present
 #define PG_W     BIT(1)   // Writeable

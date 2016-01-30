@@ -36,7 +36,7 @@ delay(void) {
 }
 
 void
-irq_handler_serial(struct regs* r) {
+irq_handler_serial(struct trapframe* r) {
     (void) r;
 
     if (serial) {

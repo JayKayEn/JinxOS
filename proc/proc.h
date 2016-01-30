@@ -7,57 +7,57 @@
 #include <cv.h>
 #include <thread.h>
 
+enum {
+    P_AVAILABLE,
+    P_STARTED,
+    P_SLEEPING,
+    P_RUNNABLE,
+    P_RUNNING,
+    P_ZOMBIE
+};
+
+#define NPROC 1024
+
 /*
  * Process structure.
  */
 struct proc {
-    char* name;           /* Name of this process */
-    struct spinlock lock;     /* Lock for this structure */
-    struct threadarray threads;   /* Threads in this process */
+    char* name;                     // Name of this process
+    struct spinlock lock;           // Lock for this structure
+    struct threadarray threads;     // Threads in this process
 
-    /* VM */
     struct pde* page_directory;
 
-    /* pid */
-    int pid;                    /* the process ID of the current process */
+    int pid;                        // the process ID of the current process
 
-    /* add more material here as needed */
-    /* ASST2 */
-    struct list* childlist; /* list with all child processes */
-    struct lock* childlist_lock; /* lock for child process list */
-    struct proc* parent;      /* parent process if not exists NULL */
-    int returnvalue;      /* in case of waitpid to store return value */
+    struct list* child_procs;         // list with all child processes
+    struct lock* child_lock;    // lock for child process list
+    struct proc* parent;            // parent process if not exists NULL
+    int rval;                       // in case of waitpid to store return value
 
-    /* we need two structs for the files. A hashtable to find the file descriptor and a list with file descriptors to copy them when forking */
-    struct fd_table* fd_table;
-
-    struct semaphore* exit_sem_child;
-    struct semaphore* exit_sem_parent;
+    struct semaphore* psem;
+    struct semaphore* csem;
 };
 
 #define thisproc (thisthread->proc)
 
-/* This is the process structure for the kernel and for kernel-only threads. */
 extern struct proc* kproc;
+extern struct proc* procs[NPROC];
 
-/* Call once during system startup to allocate data structures. */
 void init_proc(void);
 
 struct proc* proc_create(const char* name);
-
-/* Create a fresh process for use by runprogram(). */
-struct proc* proc_create_runprogram(const char* name);
-
-/* Destroy a process. */
 void proc_destroy(struct proc* proc);
 
-/* Attach a thread to a process. Must not already have a process. */
-int proc_addthread(struct proc* proc, struct thread* t);
+struct proc* proc_program(const char* name, uint8_t* binary);
 
-/* Detach a thread from its process. */
+int proc_addthread(struct proc* proc, struct thread* t);
 void proc_remthread(struct thread* t);
 
-// get the waitpid status
-int status(void);
+#define proc_binary(program)                                       \
+    do {                                                           \
+        extern uint8_t (_binary_obj_ ## program ## _start)[];         \
+        proc_program("program", _binary_obj_ ## program ## _start); \
+    } while (0)
 
-#endif /* _PROC_H_ */
+#endif // _PROC_H_

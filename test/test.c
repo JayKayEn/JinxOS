@@ -14,7 +14,7 @@ static const struct test {
     { "queue", queuetest },
     { "hashtable", hashtabletest },
 
-    { "malloc1", malloctest },
+    { "malloc", malloctest },
     { "malloc2", malloctest2 },
     { "malloc3", mallocstress },
 
@@ -23,13 +23,15 @@ static const struct test {
 
     { "threadlist", threadlisttest },
 
-    { "thread1", threadtest },
+    { "thread", threadtest },
     { "thread2", threadtest2 },
     { "thread3", threadtest3 },
     { "thread4", threadtest4 },
     { "thread5", threadtest5 },
     { "thread6", threadtest6 },
     { "thread7", threadtest7 },
+
+    { "timer", timertest },
 
     { "x", extreme }
 };

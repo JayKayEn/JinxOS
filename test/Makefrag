@@ -16,6 +16,7 @@ OBJS += $(OBJDIR)/test/threadtest7.o
 OBJS += $(OBJDIR)/test/malloctest.o
 OBJS += $(OBJDIR)/test/cvtest.o
 OBJS += $(OBJDIR)/test/locktest.o
+OBJS += $(OBJDIR)/test/timertest.o
 
 $(OBJDIR)/test/%.o: test/%.c
 	@$(CC) $(CFLAGS) -Os -c -o $@ $<

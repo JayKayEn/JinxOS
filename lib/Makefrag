@@ -5,6 +5,7 @@ OBJS += $(OBJDIR)/lib/print.o
 OBJS += $(OBJDIR)/lib/snprintf.o
 OBJS += $(OBJDIR)/lib/string.o
 OBJS += $(OBJDIR)/lib/random.o
+OBJS += $(OBJDIR)/lib/time.o
 OBJS += $(OBJDIR)/lib/atoi.o
 
 # ADTs
@@ -19,6 +20,11 @@ OBJS += $(OBJDIR)/lib/bitmap_ts.o
 OBJS += $(OBJDIR)/lib/queue_ts.o
 OBJS += $(OBJDIR)/lib/hashtable_ts.o
 
+# $(OBJDIR)/lib/%.o: lib/%.S
+# 	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
+# 	@echo " <+> $<"
+
 $(OBJDIR)/lib/%.o: lib/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
+	@$(CC) $(CFLAGS) -Os -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+

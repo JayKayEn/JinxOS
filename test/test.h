@@ -58,14 +58,7 @@ int mallocstress(int argc, char* argv[]);
 // int netqueuetest(int argc, char* argv[]);
 // #endif
 
-// /* Routine for running a user-level program. */
-// int runprogram(char *progname);
-
-// /* Kernel menu system. */
-// void menu(char *argstr);
-
-// /* The main function, called from start.S. */
-// void kmain(char *bootstring);
+int timertest(int argc, char* argv[]);
 
 int extreme(int argc, char* argv[]);
 

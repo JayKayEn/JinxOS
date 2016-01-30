@@ -7,10 +7,10 @@
 
 void
 switchframe_init(struct thread* thread,
-                 int (*entrypoint)(void* data1, unsigned long data2),
-                 void* data1, unsigned long data2);
+        int (*entrypoint)(void* data1, unsigned long data2),
+        void* data1, unsigned long data2);
 
 void
-switchframe_switch(struct regs* regs);
+switchframe_switch(struct trapframe* tf);
 
 #endif // _SWITCHFRAME_H_

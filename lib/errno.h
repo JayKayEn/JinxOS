@@ -11,6 +11,7 @@ enum {
     EMPROC,     //  Too many processes
     ENPROC,     //  Too many processes in system
     EDEADLK,    //  Resource deadlock avoided
+    ENTIMER,    //  Too many timers in system
     NERROR
 };
 

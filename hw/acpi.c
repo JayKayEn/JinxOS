@@ -11,20 +11,20 @@ struct acpi_tables {
 
 static struct acpi_tables acpi_tables;
 
-static void
-print_table_rsdp(struct acpi_table_rsdp* rsdp) {
-    print("ACPI: RSDP %08p %06x v%02d %.6s\n",
-          PADDR(rsdp), (rsdp->revision) ? rsdp->length : 20,
-          rsdp->revision, rsdp->oem_id);
-}
+// static void
+// print_table_rsdp(struct acpi_table_rsdp* rsdp) {
+//     print("ACPI: RSDP %08p %06x v%02d %.6s\n",
+//           PADDR(rsdp), (rsdp->revision) ? rsdp->length : 20,
+//           rsdp->revision, rsdp->oem_id);
+// }
 
-static void
-print_table_header(struct acpi_table_header* hdr) {
-    print("ACPI: %.4s %08p %06x v%02d %.6s %.8s %02d %.4s %02d\n",
-          hdr->signature, PADDR(hdr), hdr->length, hdr->revision,
-          hdr->oem_id, hdr->oem_table_id, hdr->oem_revision,
-          hdr->asl_compiler_id, hdr->asl_compiler_revision);
-}
+// static void
+// print_table_header(struct acpi_table_header* hdr) {
+//     print("ACPI: %.4s %08p %06x v%02d %.6s %.8s %02d %.4s %02d\n",
+//           hdr->signature, PADDR(hdr), hdr->length, hdr->revision,
+//           hdr->oem_id, hdr->oem_table_id, hdr->oem_revision,
+//           hdr->asl_compiler_id, hdr->asl_compiler_revision);
+// }
 
 static uint8_t
 sum(void* addr, int len) {
@@ -84,7 +84,7 @@ init_acpi(void) {
     rsdp = rsdp_search();
     if (!rsdp)
         panic("ACPI: No RSDP found");
-    print_table_rsdp(rsdp);
+    // print_table_rsdp(rsdp);
 
     if (rsdp->revision) {
         hdr = VADDR(rsdp->xsdt_physical_address);
@@ -100,7 +100,7 @@ init_acpi(void) {
         panic("ACPI: Incorrect %s signature", sig);
     if (sum(hdr, hdr->length))
         panic("ACPI: Bad %s checksum", sig);
-    print_table_header(hdr);
+    // print_table_header(hdr);
 
     p = hdr + 1;
     e = (void*)hdr + hdr->length;
@@ -108,7 +108,7 @@ init_acpi(void) {
         hdr = VADDR(*(uint32_t*)p);
         if (sum(hdr, hdr->length))
             continue;
-        print_table_header(hdr);
+        // print_table_header(hdr);
         assert(i < ACPI_NR_MAX);
         acpi_tables.entries[i++] = hdr;
     }

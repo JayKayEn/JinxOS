@@ -37,10 +37,10 @@ loudthread(void* junk, unsigned long num) {
         putc(ch);
         for (int j = 0; j < 1000000; ++j);
         if ((random() % NTHREADS) % 5 == 0)
-            sys_yield();
+            thread_yield();
         for (int j = 0; j < 1000000; ++j);
         if (random() % (num + 1) % 5 == 0)
-            sys_yield();
+            thread_yield();
     }
     V(tsem);
     return 0;

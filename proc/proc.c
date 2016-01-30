@@ -6,30 +6,31 @@
 #include <pidreg.h>
 #include <list.h>
 #include <semaphore.h>
+#include <elf.h>
+#include <errno.h>
+#include <gdt.h>
 
+struct proc* procs[NPROC];
 struct proc* kproc;
 
-/*
- * Create the process structure for the kernel.
- */
-void
-proc_bootstrap(void) {
+void init_proc(void) {
     assert(thisproc == NULL);
 
-    kproc = proc_create("[kproc]");
-    if (kproc == NULL)
+    struct proc* proc = proc_create("[kproc]");
+    if (proc == NULL)
         panic("proc_create for kproc failed\n");
-    kproc->page_directory = kpd;
+    proc->page_directory = kpd;
 
-    int result = proc_addthread(kproc, bootcpu->thread);
+    int result = proc_addthread(proc, bootcpu->thread);
     if (result)
         panic("proc_addthread\n");
 
     assert(thisproc != NULL);
-}
 
-void init_proc(void) {
-    proc_bootstrap();
+    proc->pid = 0;
+    procs[proc->pid] = proc;
+
+    kproc = proc;
 }
 
 struct proc*
@@ -45,187 +46,125 @@ proc_create(const char* name) {
         return NULL;
     }
 
-
-    // /* File Descriptor Table */
-    // proc->fd_table = fd_table_create(proc);
-    // if (proc->fd_table == NULL){
-    //     kfree(proc->name);
-    //     kfree(proc);
-    //     return NULL;
-    // }
-
-    // // add file descriptors for stdin, stdoud, stderr
-    // // we can not do this for the kernel process since VFS is not yet bootstrapped
-
-    // if (kproc!=NULL) {
-    //     int fdi_0, fdi_1, fdi_2;
-    //     int temp_res = 0;
-
-    //     char* console_0 = strdup("con:");
-    //     char* console_1 = strdup("con:");
-    //     char* console_2 = strdup("con:");
-
-    //     temp_res = fd_open(proc->fd_table, console_0, O_RDONLY, &fdi_0);
-    //     assert(temp_res == 0);
-    //     temp_res = fd_open(proc->fd_table, console_1, O_WRONLY, &fdi_1);
-    //     assert(temp_res == 0);
-    //     temp_res = fd_open(proc->fd_table, console_2, O_WRONLY, &fdi_2);
-    //     assert(temp_res == 0);
-
-    //     assert(fdi_2 ==2);
-    // }
-
-    threadarray_init(&proc->threads);
     spinlock_init(&proc->lock);
+    threadarray_init(&proc->threads);
 
-    /* Process ID */
     proc->pid = pidreg_getpid();
 
-    /* Child list */
-    proc->childlist = list_create();
+    proc->child_procs = list_create();
+    proc->child_lock = lock_create(name);
 
     proc->parent = NULL;
-    proc->returnvalue = 0;
-    proc->childlist_lock = lock_create(name);
-    proc->childlist_lock = lock_create(name);
-    proc->exit_sem_child = semaphore_create("wait_sem_child", 0);
-    proc->exit_sem_parent = semaphore_create("wait_sem_parent", 0);
+    proc->rval = 0;
+    proc->psem = semaphore_create("waitpid_psem", 0);
+    proc->csem = semaphore_create("waitpid_csem", 0);
+
     return proc;
 }
 
-/*
- * Destroy a proc structure.
- *
- * Note: nothing currently calls this. Your wait/exit code will
- * probably want to do so.
- */
 void
 proc_destroy(struct proc* proc) {
-    /*
-     * You probably want to destroy and null out much of the
-     * process (particularly the address space) at exit time if
-     * your wait/exit design calls for the process structure to
-     * hang around beyond process exit. Some wait/exit designs
-     * do, some don't.
-     */
-
     assert(proc != NULL);
     assert(proc != kproc);
 
-    /*
-     * We don't take p_lock in here because we must have the only
-     * reference to this structure. (Otherwise it would be
-     * incorrect to destroy it.)
-     */
-
-    // /* VM fields */
-    // if (proc->page_directory) {
-    // if (proc->addrspace) {
-    //     /*
-    //      * If p is the current process, remove it safely from
-    //      * p_addrspace before destroying it. This makes sure
-    //      * we don't try to activate the address space while
-    //      * it's being destroyed.
-    //      *
-    //      * Also explicitly deactivate, because setting the
-    //      * address space to NULL won't necessarily do that.
-    //      *
-    //      * (When the address space is NULL, it means the
-    //      * process is kernel-only; in that case it is normally
-    //      * ok if the MMU and MMU- related data structures
-    //      * still refer to the address space of the last
-    //      * process that had one. Then you save work if that
-    //      * process is the next one to run, which isn't
-    //      * uncommon. However, here we're going to destroy the
-    //      * address space, so we need to make sure that nothing
-    //      * in VM system still refers to it.)
-    //      *
-    //      * The call to as_deactivate() must come after we
-    //      * clear the address space, or a timer interrupt might
-    //      * reactivate the old address space again behind our
-    //      * back.
-    //      *
-    //      * If p is not the current process, still remove it
-    //      * from p_addrspace before destroying it as a
-    //      * precaution. Note that if p is not the current
-    //      * process, in order to be here p must either have
-    //      * never run (e.g. cleaning up after fork failed) or
-    //      * have finished running and exited. It is quite
-    //      * incorrect to destroy the proc structure of some
-    //      * random other process while it's still running...
-    //      */
-    //     struct addrspace *as;
-
-    //     if (proc == curproc) {
-    //         as = proc_setas(NULL);
-    //         as_deactivate();
-    //     }
-    //     else {
-    //         as = proc->addrspace;
-    //         proc->addrspace = NULL;
-    //     }
-    //     as_destroy(as);
-    // }
+    // page directory!
 
     threadarray_cleanup(&proc->threads);
     spinlock_cleanup(&proc->lock);
 
     pidreg_returnpid(proc->pid);
 
-    /* Child list */
-    list_destroy(proc->childlist);
-    lock_destroy(proc->childlist_lock);
-    // fd_table_destroy(proc->fd_table);
+    list_destroy(proc->child_procs);
+    lock_destroy(proc->child_lock);
+
+    semaphore_destroy(proc->psem);
+    semaphore_destroy(proc->csem);
 
     kfree(proc->name);
     kfree(proc);
 }
 
-// /*
-//  * Create a fresh proc for use by runprogram.
-//  *
-//  * It will have no address space and will inherit the current
-//  * process's (that is, the kernel menu's) current directory.
-//  */
-// struct proc *
-// proc_create_runprogram(const char *name)
-// {
-//     struct proc *proc;
+static void
+region_alloc(struct proc* proc, void* va, size_t len) {
+    assert(proc != NULL);
+    assert(va != NULL);
+    assert(va < va + len);
 
-//     proc = proc_create(name);
-//     if (proc == NULL) {
-//         return NULL;
-//     }
+    void* beg = ROUNDDOWN(va, PG_SIZE);
+    void* end = ROUNDUP(va + len, PG_SIZE);
 
-//     /* VM fields */
+    assert(beg < end);
 
-//     proc->addrspace = NULL;
+    for (void* i = beg; i < end; i += PG_SIZE) {
+        size_t pno = pp_alloc();
 
-//     /* VFS fields */
+        if (page_insert(proc->page_directory, pno, i, true, true) == ENOMEM)
+            panic("allocation attempt failed");
+    }
+}
 
-//     spinlock_acquire(&curproc->lock);
-//     /* we don't need to lock proc->lock as we have the only reference */
-//     if (curproc->cwd != NULL) {
-//         VOP_INCREF(curproc->cwd);
-//         proc->cwd = curproc->cwd;
-//     }
-//     spinlock_release(&curproc->lock);
+static void
+load_icode(struct proc* proc, uint8_t* binary, const char* name) {
+    assert(proc != NULL);
+    assert(binary != NULL);
 
-//     /* Process ID */
-//     //proc->pid = pidreg_getpid();
+    struct elf* elf = (struct elf*) binary;
+    assert(elf->magic == ELF_MAGIC);
 
-//     return proc;
-// }
+    lcr3(PADDR(proc->page_directory));
 
-/*
- * Add a thread to a process. Either the thread or the process might
- * or might not be current.
- *
- * Turn off interrupts on the local cpu while changing t_proc, in
- * case it's current, to protect against the as_activate call in
- * the timer interrupt context switch, and any other implicit uses
- * of "curproc".
- */
+    struct prog* ph = (struct prog*) ((uint8_t*) elf + elf->phoff);
+    struct prog* eph = ph + elf->phnum;
+    for (; ph < eph; ++ph) {
+        if (ph->type != PT_LOAD)
+            continue;
+
+        assert(ph->filesz <= ph->memsz);
+
+        region_alloc(proc, (void*) ph->vaddr, ph->memsz);
+        memcpy((void*) ph->vaddr, binary + ph->offset, ph->filesz);
+        memset((void*) ph->vaddr + ph->filesz, 0, ph->memsz - ph->filesz);
+    }
+
+    lcr3(PADDR(kpd));
+
+    struct thread* thread;
+    thread_fork(name, &thread, proc, (int (*)(void*, unsigned long)) elf->entry, NULL, 0);
+
+    thread->context->cs = GD_UT | DPL_USER;
+    thread->context->ds = GD_UD | DPL_USER;
+    thread->context->es = GD_UD | DPL_USER;
+    thread->context->ss = GD_UD | DPL_USER;
+    thread->context->esp = (uint32_t) USTACKTOP;
+    thread->context->ebp = 0;
+    // thread->context->eflags = FL_IF;
+
+    thread->context->eip = (uint32_t) elf->entry;
+
+    region_alloc(proc, (void*) (USTACKTOP - PG_SIZE), PG_SIZE);
+}
+
+struct proc *
+proc_program(const char* name, uint8_t* binary) {
+    assert(name != NULL);
+    assert(binary != NULL);
+
+    struct proc *proc = proc_create(name);
+    if (proc == NULL)
+        return NULL;
+
+    if((proc->page_directory = pgdir_create()) == NULL) {
+        proc_destroy(proc);
+        return NULL;
+    }
+
+    proc->pid = pidreg_getpid();
+
+    load_icode(proc, binary, name);
+
+    return proc;
+}
+
 int
 proc_addthread(struct proc* proc, struct thread* t) {
     int result;
@@ -237,19 +176,12 @@ proc_addthread(struct proc* proc, struct thread* t) {
     spinlock_release(&proc->lock);
     if (result)
         return result;
+    bool on = cli();
     t->proc = proc;
+    ifx(on);
     return 0;
 }
 
-/*
- * Remove a thread from its process. Either the thread or the process
- * might or might not be current.
- *
- * Turn off interrupts on the local cpu while changing t_proc, in
- * case it's current, to protect against the as_activate call in
- * the timer interrupt context switch, and any other implicit uses
- * of "curproc".
- */
 void
 proc_remthread(struct thread* t) {
     assert(t != NULL);
@@ -258,17 +190,19 @@ proc_remthread(struct thread* t) {
     assert(proc != NULL);
 
     spinlock_acquire(&proc->lock);
-    /* ugh: find the thread in the array */
+
     unsigned num = threadarray_num(&proc->threads);
     for (unsigned i = 0; i < num; i++) {
         if (threadarray_get(&proc->threads, i) == t) {
             threadarray_remove(&proc->threads, i);
             spinlock_release(&proc->lock);
+            bool on = cli();
             t->proc = NULL;
+            ifx(on);
             return;
         }
     }
-    /* Did not find it. */
+
     spinlock_release(&proc->lock);
     panic("Thread (%p) has escaped from its process (%p)\n", t, proc);
 }

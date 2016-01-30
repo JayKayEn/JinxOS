@@ -2,9 +2,6 @@
 // See Chapter 8 & Appendix C of Intel processor manual volume 3.
 
 #include <lib.h>
-// #include <inc/memlayout.h>
-// #include <inc/trap.h>
-// #include <inc/mmu.h>
 #include <x86.h>
 #include <pmm.h>
 #include <cpu.h>
@@ -65,8 +62,8 @@ init_lapic(void) {
     // region.  Map it in to virtual memory so we can access it.
     lapic = mmio_map(lapic_addr, 4096);
 
-    if (thiscpu == bootcpu)
-        print("SMP: LAPIC %08p v%02x\n", lapic_addr, lapic_read(VER) & 0xFF);
+    // if (thiscpu == bootcpu)
+    //     print("SMP: LAPIC %08p v%02x\n", lapic_addr, lapic_read(VER) & 0xFF);
 
     // Enable local APIC; set spurious interrupt vector.
     lapic_write(SVR, ENABLE | (IRQ_OFFSET + IRQ_SPUR));

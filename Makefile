@@ -1,21 +1,26 @@
-CC = i386-jos-elf-gcc
-CFLAGS = -Wall -Wextra -Werror -m32 -Wno-comment
+CC := i386-jos-elf-gcc
+CFLAGS := -Wall -Wextra -Werror -m32 -Wno-comment
 CFLAGS += -gstabs
 # CFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-function
 # CFLAGS += -Wno-implicit-function-declaration -Wno-unused-parameter
 CFLAGS += -fno-builtin -fno-stack-protector -ffreestanding
 CFLAGS += -nostartfiles -nodefaultlibs -nostdinc -nostdlib
 
+UFLAGS := $(CFLAGS)
+UFLAGS += -DUSER -I./user -I./lib
+
 OBJDIR := obj
 
-LD = i386-jos-elf-ld
-LFLAGS = -m elf_i386 -nostdlib
+LD := i386-jos-elf-ld
+LFLAGS := -m elf_i386 -nostdlib
 
-COPY = i386-jos-elf-objcopy
-DUMP = i386-jos-elf-objdump
+AR := i386-jos-elf-ar
 
-GCC_LIB = ./lib/libgcc.a
-# GCC_LIB = /usr/lib/gcc/x86_64-linux-gnu/4.8/libgcc.a
+COPY := i386-jos-elf-objcopy
+DUMP := i386-jos-elf-objdump
+
+GCC_LIB := ./lib/libgcc.a
+# GCC_LIB := /usr/lib/gcc/x86_64-linux-gnu/4.8/libgcc.a
 # GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 GDBPORT	:= $(shell expr `id -u` % 1024 + 25000)
@@ -23,7 +28,7 @@ GDB	:= i386-jos-elf-gdb
 
 CPUS ?= 1
 
-QEMU = qemu-system-i386
+QEMU := qemu-system-i386
 
 QEMUOPTS = -m 256M -serial mon:stdio -smp cpus=$(CPUS) -gdb tcp::$(GDBPORT)
 QEMUOPTS += -M q35
@@ -31,11 +36,12 @@ QEMUOPTS += -drive file=$(OBJDIR)/jinx,format=raw,if=none,id=kernel
 QEMUOPTS += -device piix4-ide,id=piix4-ide
 QEMUOPTS += -device ide-hd,drive=kernel,bus=piix4-ide.0
 QEMUOPTS += -smp 1
-# QEMUOPTS += -soundhw sb16,adlib,pcspk
+QEMUOPTS += -soundhw sb16,adlib,pcspk
 
 default: $(OBJDIR)/jinx
 
 OBJS :=
+BINS :=
 
 include boot/Makefrag
 include kern/Makefrag
@@ -49,6 +55,7 @@ include cpu/Makefrag
 include proc/Makefrag
 include console/Makefrag
 include test/Makefrag
+include user/Makefrag
 
 INCLUDE := -I./include
 INCLUDE += -I./boot
@@ -63,6 +70,21 @@ INCLUDE += -I./cpu
 INCLUDE += -I./proc
 INCLUDE += -I./console
 INCLUDE += -I./test
+
+.PRECIOUS: %.o 				\
+	$(OBJDIR)/boot/%.o 		\
+	$(OBJDIR)/kern/%.o 		\
+	$(OBJDIR)/debug/%.o 	\
+	$(OBJDIR)/mem/%.o 		\
+	$(OBJDIR)/hw/%.o 		\
+	$(OBJDIR)/synch/%.o 	\
+	$(OBJDIR)/lib/%.o 		\
+	$(OBJDIR)/thread/%.o 	\
+	$(OBJDIR)/cpu/%.o 		\
+	$(OBJDIR)/proc/%.o 		\
+	$(OBJDIR)/console/%.o 	\
+	$(OBJDIR)/test/%.o 		\
+	$(OBJDIR)/user/%.o
 
 CFLAGS += $(INCLUDE)
 
@@ -95,8 +117,8 @@ $(OBJDIR)/jinx: $(OBJDIR)/kernel $(OBJDIR)/boot/boot
 	@dd if=$(OBJDIR)/kernel of=$(OBJDIR)/jinx~ seek=1 conv=notrunc 2>/dev/null
 	@mv $(OBJDIR)/jinx~ $@
 
-$(OBJDIR)/kernel: $(OBJS)
-	@$(LD) -o $@ -T linker.ld -nostdlib $(LFLAGS) $^ $(GCC_LIB)
+$(OBJDIR)/kernel: $(OBJS) $(BINS)
+	@$(LD) -o $@ -T kern/kern.ld $(LFLAGS) $(OBJS) $(GCC_LIB) -b binary $(BINS)
 	@$(DUMP) -S $@ > $@.asm
 
 $(OBJDIR)/%.o: %.S
@@ -128,3 +150,5 @@ clean:
 	rm -rf $(OBJDIR)/proc/*
 	rm -rf $(OBJDIR)/console/*
 	rm -rf $(OBJDIR)/test/*
+	rm -rf $(OBJDIR)/fs/*
+	rm -rf $(OBJDIR)/user/*

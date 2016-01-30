@@ -18,7 +18,6 @@ lock_create(const char* name) {
         return NULL;
     }
 
-    // initially lock is owned by no one
     lock->lk_owner = NULL;
     lock->lk_count = 0;
 
@@ -29,7 +28,6 @@ lock_create(const char* name) {
         return NULL;
     }
 
-    // lock gets its own baby lock
     spinlock_init(&lock->lk_lock);
 
     return lock;
@@ -39,7 +37,6 @@ void
 lock_destroy(struct lock* lock) {
     assert(lock != NULL);
 
-    /* wchan_cleanup will assert if anyone's waiting on it */
     spinlock_cleanup(&lock->lk_lock);
     wchan_destroy(lock->lk_wchan);
     kfree(lock->lk_owner);
@@ -81,7 +78,6 @@ lock_release(struct lock* lock) {
 
     spinlock_acquire(&lock->lk_lock);
 
-    // if I don't hold lock, I can't release it
     assert(lock_holding(lock));
     assert(lock->lk_count > 0);
 
@@ -101,7 +97,5 @@ lock_holding(struct lock* lock) {
     assert(lock != NULL);
     assert(thisthread != NULL);
 
-    if (lock->lk_owner == NULL)
-        return false;
-    return lock->lk_owner == thisthread;
+    return lock->lk_owner != NULL ? lock->lk_owner == thisthread : false;
 }

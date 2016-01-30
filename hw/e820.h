@@ -29,7 +29,4 @@ struct e820_map {
 
 extern struct e820_map e820_map;
 
-// void init_e820(size_t mbi_addr);
-void print_e820_mmap(void);
-
 #endif // _E820_H_

@@ -20,16 +20,16 @@ SECTIONS {
 	. = ALIGN(0x1000);
 
 	.stab : {
-		PROVIDE(_sym_table = .);
+		PROVIDE(_stab = .);
 		*(.stab);
-		PROVIDE(_esym_table = .);
+		PROVIDE(_estab = .);
 		BYTE(0)
 	}
 
 	.stabstr : {
-		PROVIDE(_stab_strs = .);
+		PROVIDE(_stabstr = .);
 		*(.stabstr);
-		PROVIDE(_estab_strs = .);
+		PROVIDE(_estabstr = .);
 		BYTE(0)
 	}
 

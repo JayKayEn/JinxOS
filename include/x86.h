@@ -1,25 +1,7 @@
 #ifndef _X86_H_
 #define _X86_H_
 
-#ifndef _TYPES_
-#define _TYPES_
-
-typedef _Bool bool;
-enum { false, true };
-
-typedef signed char           int8_t;
-typedef short                int16_t;
-typedef int                  int32_t;
-typedef long long            int64_t;
-
-typedef unsigned char        uint8_t;
-typedef unsigned short      uint16_t;
-typedef unsigned int        uint32_t;
-typedef unsigned long long  uint64_t;
-
-typedef uint32_t              size_t;
-
-#endif // _TYPES_
+#include <types.h>
 
 static inline uint32_t read_eflags(void);
 
@@ -303,6 +285,18 @@ read_msr(uint32_t msr) {
 static inline void
 write_msr(uint32_t msr, uint64_t val) {
     asm volatile("wrmsr" : : "c" (msr), "A" (val));
+}
+
+static inline uint64_t
+rdtsc(void) {
+    uint64_t tsc = 0, junk = 0;
+    asm volatile (
+        "rdtsc\n"
+        "movl %%eax, %0\n"
+        "movl %%edx, %1\n"
+        : "=r"(tsc), "=r"(junk)
+    );
+    return tsc;
 }
 
 #endif // _X86_H_

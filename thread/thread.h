@@ -21,7 +21,7 @@ typedef enum {      // running, ready, waiting, start, done
 } threadstate_t;
 
 struct thread {
-    struct regs* context;      /* Saved register context (on stack) */
+    struct trapframe* context;      /* Saved register context (on stack) */
     struct threadlistnode listnode;
 
     char* name;
@@ -31,7 +31,6 @@ struct thread {
     struct cpu* cpu;                  /* CPU thread runs on */
     struct proc* proc;                /* Process thread belongs to */
 
-    struct pde* page_directory;
     void* stack;
 
     /*
@@ -121,6 +120,7 @@ void thread_make_runnable(struct thread* target, bool holding_lock);
  * Interrupts need not be disabled.
  */
 void thread_yield(void);
+void thread_wait(struct wchan* wc, struct spinlock* lk);
 
 /*
  * Reshuffle the run queue. Called from the timer interrupt.

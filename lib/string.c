@@ -1,5 +1,14 @@
-#include <lib.h>
-#include <kmm.h>
+#include <types.h>
+
+size_t strlen(const char* str);
+char* strchr(const char* s, char c);
+char* strstr(const char* str, const char* sub);
+int strcmp(const char* s1, const char* s2);
+char* strcat(char* dst, const char* s2);
+char* strcpy(char* dst, const char* src);
+int strncmp(const char* s1, const char* s2, size_t n);
+char* strncat(char* dst, const char* src, size_t n);
+char* strncpy(char* dst, const char* src, size_t n);
 
 size_t
 strlen(const char* str) {
@@ -8,18 +17,6 @@ strlen(const char* str) {
         len++;
 
     return len;
-}
-
-char*
-strdup(const char* s) {
-    size_t len = strlen(s);
-    char* dup = kmalloc(len + 1);
-
-    for (size_t i = 0; i < len; i++)
-        dup[i] = s[i];
-    dup[len] = 0;
-
-    return dup;
 }
 
 char*
@@ -159,3 +156,20 @@ memcmp(const void* s1, const void* s2, size_t n) {
     }
     return (0);
 }
+
+#ifndef USER
+#include <kmm.h>
+
+char*
+strdup(const char* s) {
+    size_t len = strlen(s);
+    char* dup = kmalloc(len + 1);
+
+    for (size_t i = 0; i < len; i++)
+        dup[i] = s[i];
+    dup[len] = 0;
+
+    return dup;
+}
+
+#endif

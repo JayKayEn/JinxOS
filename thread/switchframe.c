@@ -4,10 +4,11 @@
 #include <int.h>
 #include <thread.h>
 #include <debug.h>
+#include <gdt.h>
 
 void
-switchframe_switch(struct regs* regs) {
-    assert(regs != NULL);
+switchframe_switch(struct trapframe* tf) {
+    assert(tf != NULL);
 
     asm volatile(
         "\tmovl     %0,%%esp\n"
@@ -16,7 +17,7 @@ switchframe_switch(struct regs* regs) {
         "\tpopal\n"
         "\taddl     $0x8,%%esp\n"
         "\tiret\n"
-        : : "g" (regs) : "memory"
+        : : "g" (tf) : "memory"
     );
 
     panic("returned to switchframe_switch");
@@ -41,8 +42,8 @@ switchframe_init(struct thread* thread,
                  void* data1, unsigned long data2) {
     uint32_t stacktop = (uint32_t) thread->stack + STACK_SIZE;
 
-    thread->context = (struct regs*) stacktop - 1;
-    memset(thread->context, 0, sizeof(struct regs));
+    thread->context = (struct trapframe*) stacktop - 1;
+    memset(thread->context, 0, sizeof(struct trapframe));
 
     thread->context->cs = GD_KT;
     thread->context->ds = GD_KD;

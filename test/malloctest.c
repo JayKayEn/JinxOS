@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <test.h>
 #include <kmm.h>
-#include <err.h>
+#include <errno.h>
 #include <thread.h>
 #include <semaphore.h>
 #include <pmm.h>

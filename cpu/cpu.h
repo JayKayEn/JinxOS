@@ -5,8 +5,9 @@
 #include <thread.h>
 #include <threadlist.h>
 #include <spinlock.h>
-
-#define NCPU  8
+#include <tss.h>
+#include <gcc.h>
+#include <vmm.h>
 
 enum {
     CPU_OFF = 0,
@@ -32,8 +33,11 @@ struct cpu {
     // struct tlbshootdown shootdown[TLBSHOOTDOWN_MAX];
     int numshootdown;
     struct spinlock ipi_lock;
+
+    struct taskstate ts;
 };
 
+#define NCPU 8
 struct cpu* cpus[NCPU];
 uint8_t ncpu;
 

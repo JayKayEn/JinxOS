@@ -113,7 +113,7 @@ static uint8_t* charcode[4] = {
 
 /* Handles the keyboard interrupt */
 void
-irq_handler_kdb(struct regs* r) {
+irq_handler_kdb(struct trapframe* r) {
     (void) r;
 
     static uint32_t shift;

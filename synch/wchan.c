@@ -4,7 +4,7 @@
 #include <wchan.h>
 #include <kmm.h>
 #include <spinlock.h>
-#include <err.h>
+#include <errno.h>
 #include <array.h>
 #include <syscall.h>
 
@@ -104,8 +104,7 @@ wchan_sleep(struct wchan* wc, struct spinlock* lk) {
     /* must not hold other spinlocks */
     assert(thiscpu->spinlocks == 1);
 
-    // thread_switch(S_SLEEP, wc, lk);
-    sys_sleep(wc, lk);
+    thread_wait(wc, lk);
 
     spinlock_acquire(lk);
 }
@@ -132,7 +131,7 @@ wchan_wakeone(struct wchan* wc, struct spinlock* lk) {
      * while we're holding LK. This is ok; all spinlocks
      * associated with wchans must come before the runqueue locks,
      * as we also bridge from the wchan lock to the runqueue lock
-     * in thread_sleep.
+     * in thread_wait.
      */
 
     thread_make_runnable(target, false);

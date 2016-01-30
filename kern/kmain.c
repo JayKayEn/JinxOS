@@ -13,6 +13,7 @@
 // #include <acpi.h>
 #include <cpu.h>
 #include <test.h>
+#include <proc.h>
 
 // demand() will restart if the expression evaluates to false
 #define demand(exp)                                         \
@@ -27,32 +28,32 @@ uint32_t bpgd[TBL_SIZE] PAGE_ALIGNED = {
     [PDX(KADDR) + 1] = 0x400000  | PG_P | PG_W | PG_PS,
     [PDX(KADDR) + 2] = 0x800000  | PG_P | PG_W | PG_PS,
     [PDX(KADDR) + 3] = 0xC00000  | PG_P | PG_W | PG_PS,
-
 };
 
-// static void jinx() {
-//     static const char* title[] = {
-//         "\t\t          _/  _/                               _/_/      _/_/_/\n",
-//         "\t\t         _/      _/_/_/    _/    _/         _/    _/  _/       \n",
-//         "\t\t        _/  _/  _/    _/    _/_/           _/    _/    _/_/    \n",
-//         "\t\t _/    _/  _/  _/    _/  _/    _/         _/    _/        _/   \n",
-//         "\t\t  _/_/    _/  _/    _/  _/    _/           _/_/    _/_/_/      \n",
-//     };
+static void jinx() {
+    static const char* title[] = {
+        "\t\t          _/  _/                               _/_/      _/_/_/\n",
+        "\t\t         _/      _/_/_/    _/    _/         _/    _/  _/       \n",
+        "\t\t        _/  _/  _/    _/    _/_/           _/    _/    _/_/    \n",
+        "\t\t _/    _/  _/  _/    _/  _/    _/         _/    _/        _/   \n",
+        "\t\t  _/_/    _/  _/    _/  _/    _/           _/_/    _/_/_/      \n",
+    };
 
-//     print("\n");
-//     for (int i = 0, k = 0; i < 5; ++i, k = 0) {
-//         for (int j = 0; j < 6 - i; ++j, ++k)    // whitespace
-//             putc(title[i][k]);
-//         settextcolor(VGA_DGREEN);
-//         for (int j = 0; j < 32; ++j, ++k)       // "Jinx"
-//             putc(title[i][k]);
-//         settextcolor(VGA_DGREY);
-//         for (int j = 0; j < 27; ++j, ++k)       // "OS"
-//             putc(title[i][k]);
-//         putc('\n');
-//     }
-//     settextcolor(VGA_NORMAL);
-// }
+    print("\n");
+    for (int i = 0, k = 0; i < 5; ++i, k = 0) {
+        for (int j = 0; j < 6 - i; ++j, ++k)    // whitespace
+            putc(title[i][k]);
+        settextcolor(VGA_DGREEN);
+        for (int j = 0; j < 32; ++j, ++k)       // "Jinx"
+            putc(title[i][k]);
+        settextcolor(VGA_DGREY);
+        for (int j = 0; j < 27; ++j, ++k)       // "OS"
+            putc(title[i][k]);
+        putc('\n');
+    }
+    print("\n");
+    settextcolor(VGA_NORMAL);
+}
 
 void
 kmain(uint32_t eax, size_t ebx) {
@@ -93,12 +94,22 @@ kmain(uint32_t eax, size_t ebx) {
 
     init_lapic();
 
+    jinx();
+
     sti();
     hlt();
 
-    // jinx();
-
+    cli();
     // init_speaker();
+
+    // proc_binary(user_hello);
+
+    sti();
+    hlt();
+
+    // thread_yield();
+
+    // print("userspace programs exited.\n");
 
     for (;;)
         prompt();

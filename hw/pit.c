@@ -6,7 +6,7 @@
 #include <debug.h>
 #include <lapic.h>
 
-#define PIT_DEFAULT 10000
+#define PIT_DEFAULT 1000
 #define YIELD_MOD   1
 
 static volatile uint32_t nticks;
@@ -25,7 +25,7 @@ void pit_reset(void) {
 }
 
 void pit_freq(double hz) {
-    uint16_t interval = 1193180 / hz;
+    uint16_t interval = (uint16_t) (1193180.0 / hz);
 
     outb(0x43, 0x36);
     outb(0x40, interval & 0xFF);
@@ -34,14 +34,14 @@ void pit_freq(double hz) {
     pit_reset();
 }
 
-void irq_handler_pit(struct regs* r) {
+void irq_handler_pit(struct trapframe* r) {
     (void) r;
 
     lapic_eoi();
 
     if (++nticks % YIELD_MOD == 0) {
         thisthread->context = r;
-        thread_yield();
+        thread_schedule();
     }
 }
 

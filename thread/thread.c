@@ -10,13 +10,23 @@
 #include <wchan.h>
 #include <array.h>
 #include <semaphore.h>
-#include <stackreg.h>
-#include <err.h>
+#include <errno.h>
 #include <switchframe.h>
 #include <debug.h>
 #include <syscall.h>
 
 DEFARRAY(thread, );
+
+#define THREAD_STACK_MAGIC 0xDEADFACE
+
+static
+void
+thread_initstack(void* stack_addr) {
+    ((uint32_t*) stack_addr)[0] = THREAD_STACK_MAGIC;
+    ((uint32_t*) stack_addr)[1] = THREAD_STACK_MAGIC;
+    ((uint32_t*) stack_addr)[2] = THREAD_STACK_MAGIC;
+    ((uint32_t*) stack_addr)[3] = THREAD_STACK_MAGIC;
+}
 
 static
 void
@@ -26,6 +36,30 @@ thread_checkstack(struct thread* thread) {
     assert(((uint32_t*) thread->stack)[1] = THREAD_STACK_MAGIC);
     assert(((uint32_t*) thread->stack)[2] = THREAD_STACK_MAGIC);
     assert(((uint32_t*) thread->stack)[3] = THREAD_STACK_MAGIC);
+}
+
+/*
+ * Marks next avaialble stack_addr in registrar's bitmap as in use.
+ * Returns this stack_addr.
+ */
+void*
+thread_getstack(void) {
+    void* stack_addr = page_get();
+
+    if (stack_addr == NULL)
+        panic("OOM: no memory available for stack creation");
+
+    thread_initstack(stack_addr);
+
+    return stack_addr;
+}
+
+// this makes a stack_addr available again to the system
+void
+thread_returnstack(void* stack_addr) {
+    assert(stack_addr != NULL);
+
+    page_return(stack_addr);
 }
 
 struct thread*
@@ -49,7 +83,6 @@ thread_create(const char* name) {
     thread->cpu = NULL;
     thread->proc = NULL;
 
-    thread->page_directory = NULL;
     thread->stack = NULL;
 
     thread->in_interrupt = false;
@@ -64,8 +97,8 @@ thread_create(const char* name) {
 
 int
 thread_fork(const char* name, struct thread** thread_out,
-            struct proc* proc, int (*entrypoint)(void*, unsigned long),
-            void* data1, unsigned long data2) {
+        struct proc* proc, int (*entrypoint)(void*, unsigned long),
+        void* data1, unsigned long data2) {
 
     bool on = cli();
 
@@ -73,7 +106,7 @@ thread_fork(const char* name, struct thread** thread_out,
     if (newthread == NULL)
         return ENOMEM;
 
-    newthread->stack = stackreg_get();
+    newthread->stack = thread_getstack();
     if (newthread->stack == NULL) {
         thread_destroy(newthread);
         return ENOMEM;
@@ -81,7 +114,6 @@ thread_fork(const char* name, struct thread** thread_out,
     thread_checkstack(newthread);
 
     newthread->cpu = thiscpu;
-    newthread->page_directory = thisthread->page_directory;
 
     if (thread_out != NULL) {
         *thread_out = newthread;
@@ -126,8 +158,9 @@ thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
     assert(thiscpu->thread == thisthread);
     assert(thisthread->cpu == thiscpu->self);
 
-    // we may already have stackreg's spinlock and we can't reacquire it so skip
-    // exorcising if going to sleep
+    // TODO: revise the following comment because I no longer use stackreg:
+    // // we may already have stackreg's spinlock and we can't reacquire it so skip
+    // // exorcising if going to sleep
     if (newstate != S_SLEEP)
         thread_exorcise();
 
@@ -184,14 +217,9 @@ thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
     next->wchan_name = NULL;
     next->state = S_RUN;
 
-    // lcr3(PADDR(thisthread->page_directory));
+    lcr3(PADDR(next->proc->page_directory));
 
     spinlock_release(&thiscpu->active_threads_lock);
-
-    if (next->context->es != 0x10) {
-        print_regs(next->context);
-        panic("corrupt next context: %x", next->context->es);
-    }
 
     switchframe_switch((thisthread = next)->context);
 
@@ -199,7 +227,7 @@ thread_switch(threadstate_t newstate, struct wchan* wc, struct spinlock* lk) {
 }
 
 void
-thread_yield(void) {
+thread_schedule(void) {
     assert(cli() == false);  // interrupts are off
     thread_switch(S_READY, NULL, NULL);
 }
@@ -222,16 +250,13 @@ thread_start(int (*entrypoint)(void* data1, unsigned long data2),
     sti();
 
     while (random() & 0x3)
-        sys_yield();
+        thread_yield();
 
     int ret = entrypoint(data1, data2);
-
-    // cli();
 
     cli();
     thread_exit(ret);
 
-    // sys_exit(ret);
 }
 
 void
@@ -257,6 +282,8 @@ thread_exit(int ret) {
 
     thread_checkstack(thisthread);
 
+    assert(thiscpu->status != CPU_IDLE);
+
     thread_switch(S_ZOMBIE, NULL, NULL);
 
     panic("thread_switch returned\n");
@@ -272,7 +299,7 @@ thread_destroy(struct thread* thread) {
     // if (thread->page_directory != NULL)
     //     kfree(thread->page_directory);      // not correct
 
-    stackreg_return(thread->stack);
+    thread_returnstack(thread->stack);
 
     threadlistnode_cleanup(&thread->listnode);
 
@@ -334,7 +361,6 @@ void thread_panic(void) {
     thiscpu->active_threads.tl_count = 0;
     thiscpu->active_threads.tl_head.tln_next = &thiscpu->active_threads.tl_tail;
     thiscpu->active_threads.tl_tail.tln_prev = &thiscpu->active_threads.tl_head;
-
 }
 
 void thread_shutdown(void) {

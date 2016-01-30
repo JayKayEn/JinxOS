@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <kmm.h>
 #include <list.h>
-#include <err.h>
+#include <errno.h>
 
 #define LISTTYPE 1111
 #define LISTNODETYPE 1112

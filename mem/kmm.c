@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <kmm.h>
 #include <pmm.h>
-#include <err.h>
+#include <errno.h>
 #include <mm.h>
 #include <spinlock.h>
 #include <memlib.h>
@@ -19,12 +19,12 @@ init_kmm(void) {
 }
 
 void*
-kalign(size_t nbytes) {
+kpalloc(void) {
     spinlock_acquire(&mem_lock);
 
-    size_t kptr = ROUNDDOWN(kbrk_max - nbytes, PG_SIZE);
+    size_t kptr = ROUNDDOWN(kbrk_max - PG_SIZE, PG_SIZE);
     kbrk_max = kptr;
-    memset((void*) kptr, 0, nbytes);
+    memset((void*) kptr, 0, PG_SIZE);
 
     spinlock_release(&mem_lock);
 

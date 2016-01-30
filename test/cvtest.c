@@ -98,7 +98,7 @@ int test_cv_signal() {
     while (wchan_isempty(test_cv->cv_wchan, &test_cv->cv_splock)) {
         // don't don't don't sleep while holding the spinlock
         spinlock_release(&test_cv->cv_splock);
-        sys_yield();
+        thread_yield();
         // must re-acquire before going round the loop
         spinlock_acquire(&test_cv->cv_splock);
     }
@@ -157,7 +157,7 @@ int test_cv_broadcast() {
     while (broadcast_wakes > 0) {
         // don't don't don't sleep while holding the spinlock
         spinlock_release(&test_cv->cv_splock);
-        sys_yield();
+        thread_yield();
         // must re-acquire before going round the loop
         spinlock_acquire(&test_cv->cv_splock);
     }

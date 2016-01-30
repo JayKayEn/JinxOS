@@ -10,16 +10,20 @@ syscall(uint32_t num, uint32_t a1, uint32_t a2, uint32_t a3) {
     int ret = 0;
 
     switch (num) {
-        case syscall_yield:
-            thread_yield();
+        case syscall_putc:
+            putc((char) a1);
             break;
-        case syscall_sleep:
+        case syscall_exit:
+            thread_exit((int) a1);
+            break;
+        case syscall_thread_yield:
+            thread_switch(S_READY, NULL, NULL);
+            break;
+        case syscall_thread_wait:
             assert(a1 != 0);
             assert(a2 != 0);
             thread_switch(S_SLEEP, (struct wchan*) a1, (struct spinlock*) a2);
             break;
-        // case syscall_exit:
-        //     thread_exit((int) a1);
         default:
             panic("unhandled syscall no: %u", num);
     }
@@ -57,16 +61,11 @@ _syscall(int num, bool check, uint32_t a1, uint32_t a2, uint32_t a3) {
 }
 
 void
-sys_yield(void) {
-    _syscall(syscall_yield, false, 0, 0, 0);
+thread_yield(void) {
+    _syscall(syscall_thread_yield, false, 0, 0, 0);
 }
 
 void
-sys_sleep(struct wchan* wc, struct spinlock* lk) {
-    _syscall(syscall_sleep, false, (uint32_t) wc, (uint32_t) lk, 0);
+thread_wait(struct wchan* wc, struct spinlock* lk) {
+    _syscall(syscall_thread_wait, false, (uint32_t) wc, (uint32_t) lk, 0);
 }
-
-// void
-// sys_exit(int ret) {
-//     _syscall(syscall_exit, false, (uint32_t) ret, 0, 0);
-// }

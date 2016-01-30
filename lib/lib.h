@@ -2,28 +2,7 @@
 #define _LIB_H_
 
 #include <vargs.h>
-
-#define NULL ((void*) 0)
-
-#ifndef _TYPES_
-#define _TYPES_
-
-typedef _Bool bool;
-enum { false, true };
-
-typedef signed char           int8_t;
-typedef short                int16_t;
-typedef int                  int32_t;
-typedef long long            int64_t;
-
-typedef unsigned char        uint8_t;
-typedef unsigned short      uint16_t;
-typedef unsigned int        uint32_t;
-typedef unsigned long long  uint64_t;
-
-typedef uint32_t              size_t;
-
-#endif // _TYPES_
+#include <types.h>
 
 int atoi(const char* s);
 char getc(void);
@@ -85,17 +64,19 @@ void _panic(const char* file, int line, const char* func, const char* fmt, ...);
     __a >= __b ? __a : __b;     \
 })
 
-#define ROUNDDOWN(_a, _n)                 \
+#define ROUNDDOWN(_a, _n)               \
 ({                                      \
-    size_t __a = (size_t) (_a);      \
-    (typeof(_a)) (__a - __a % (_n));      \
+    size_t __a = (size_t) (_a);         \
+    (typeof(_a)) (__a - __a % (_n));    \
 })
 
-#define ROUNDUP(_a, _n)                                           \
+#define ROUNDUP(_a, _n)                                         \
 ({                                                              \
-    size_t __n = (size_t) (_n);                              \
+    size_t __n = (size_t) (_n);                                 \
     (typeof(_a)) (ROUNDDOWN((size_t) (_a) + __n - 1, __n));     \
 })
+
+#define SWAP(_a, _b) ((_a)^=(_b),(_b)^=(_a),(_a)^=(_b))
 
 #define BIT(n)      (1UL << (n))
 

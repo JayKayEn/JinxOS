@@ -283,8 +283,11 @@ void* kmalloc(size_t size) {
 
     spinlock_release(&mem_lock);
 
+    void* ptr = ADD(block, WORD_SIZE);
+    memset(ptr, 0, size);
+
     // Return a pointer to the start of the payload
-    return ADD(block, WORD_SIZE);
+    return ptr;
 }
 
 void kfree(void* ptr) {

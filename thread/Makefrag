@@ -3,7 +3,6 @@ OBJDIRS += $(OBJDIR)/thread
 OBJS += $(OBJDIR)/thread/thread.o
 OBJS += $(OBJDIR)/thread/threadlist.o
 OBJS += $(OBJDIR)/thread/switchframe.o
-OBJS += $(OBJDIR)/thread/stackreg.o
 
 $(OBJDIR)/thread/%.o: thread/%.S
 	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null

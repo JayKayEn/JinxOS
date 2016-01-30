@@ -2,7 +2,7 @@
 #include <test.h>
 #include <heap.h>
 #include <array.h>
-#include <err.h>
+#include <errno.h>
 #include <kmm.h>
 
 #define HEAPTYPE 3333

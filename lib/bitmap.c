@@ -1,6 +1,6 @@
 #include <lib.h>
 #include <kmm.h>
-#include <err.h>
+#include <errno.h>
 #include <bitmap.h>
 
 #define DIVROUNDUP(a,b) (((a)+(b)-1)/(b))

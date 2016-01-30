@@ -28,8 +28,10 @@ threadtest7(int argc, char** argv) {
 
     print("Starting thread test 7...\n");
 
-    for (int i = 0; i < 128; ++i)
-        assert(sum(NULL, i) == i);
+    for (int i = 0; i < 64; ++i) {
+        int count = random() % 0xFF;
+        assert(sum(NULL, count) == count);
+    }
 
     print("Thread test 7 complete.\n");
 

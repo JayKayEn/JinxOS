@@ -14,57 +14,24 @@
 // #include <debug.h>
 // #include <int.h>
 
-int cmd_help(int argc, char* argv[]);
-int cmd_info(int argc, char* argv[]);
-int cmd_clear(int argc, char* argv[]);
-int cmd_e820(int argc, char* argv[]);
-int cmd_meminfo(int argc, char* argv[]);
-int cmd_reboot(int argc, char* argv[]);
-int cmd_timestamp(int argc, char* argv[]);
-int cmd_ticks(int argc, char* argv[]);
-int cmd_test(int argc, char* argv[]);
+static int cmd_help(int argc, char* argv[]);
+static int cmd_info(int argc, char* argv[]);
+static int cmd_clear(int argc, char* argv[]);
+static int cmd_reboot(int argc, char* argv[]);
+static int cmd_ticks(int argc, char* argv[]);
+static int cmd_test(int argc, char* argv[]);
 
 static const struct cmd {
     const char* name;
     const char* desc;
     int (*func)(int argc, char* argv[]);
 } cmds[] = {
-    {
-        "help", "    Display this list of commands",
-        cmd_help
-    },
-    {
-        "info", "    Display kernel info",
-        cmd_info
-    },
-    {
-        "clear", "   Clear the console of text",
-        cmd_clear
-    },
-    {
-        "e820", "    Display the E820h memory map",
-        cmd_e820
-    },
-    {
-        "mem", "     Information about physical memory contents",
-        cmd_meminfo
-    },
-    {
-        "time", "    Displays the CPU's current timestamp counter",
-        cmd_timestamp
-    },
-    {
-        "ticks", "   Get the number of times the system timer has gone off",
-        cmd_ticks
-    },
-    {
-        "reboot", "  Restart the computer and reload the bootloader",
-        cmd_reboot
-    },
-    {
-        "test", "    Run system tests",
-        cmd_test
-    }
+    {"help", "  -  Display this list of commands", cmd_help},
+    {"info", "  -  Display kernel info", cmd_info},
+    {"clear", " -  Clear the console of text", cmd_clear},
+    {"ticks", " -  Display the number of pit ticks since boot", cmd_ticks},
+    {"reboot", "-  Restart the computer and reload the bootloader", cmd_reboot},
+    {"test", "  -  Run system tests", cmd_test}
 };
 
 extern int test_suite(int argc, char* argv[]);
@@ -75,17 +42,17 @@ cmd_test(int argc, char* argv[]) {
     return 0;
 }
 
-int
+static int
 cmd_help(int argc, char* argv[]) {
     (void) argc;
     (void) argv;
 
-    for (size_t i = 0; i < ARRAY_SIZE(cmds); i++)
+    for (size_t i = 1; i < ARRAY_SIZE(cmds); i++)
         print("\t%s  %s\n", cmds[i].name, cmds[i].desc);
     return 0;
 }
 
-int cmd_info(int argc, char* argv[]) {
+static int cmd_info(int argc, char* argv[]) {
     (void) argc;
     (void) argv;
 
@@ -93,7 +60,7 @@ int cmd_info(int argc, char* argv[]) {
     return 0;
 }
 
-int
+static int
 cmd_clear(int argc, char* argv[]) {
     (void) argc;
     (void) argv;
@@ -102,72 +69,7 @@ cmd_clear(int argc, char* argv[]) {
     return 0;
 }
 
-int
-cmd_e820(int argc, char* argv[]) {
-    (void) argc;
-    (void) argv;
-
-    print_e820_mmap();
-    return 0;
-}
-
-int
-cmd_meminfo(int argc, char* argv[]) {
-    (void) argc;
-    (void) argv;
-
-    extern char _start[], _text[], _etext[], _rodata[], _erodata[],
-           _sym_table[], _esym_table[], _stab_strs[], _estab_strs[],
-           _data[], _edata[], _bss[], _ebss[], _end[];
-
-    print("\tPhysical Memory Layout:\n");
-
-    print("\t  Lower:\n");
-    print("\t\tbootsector  [ %08p - %08p ]\n",
-          0x7c00, 0x7e00);
-    print("\t\tmultiboot   [ %08p - %08p ]\n",
-          mbi->mmap_addr, mbi->mmap_addr + mbi->mmap_length - 1);
-    print("\t\tmboot info  [ %08p - %08p ]\n",
-          mbi, (char*) mbi + sizeof(*mbi));
-    print("\t\tfree memory [ %08p - %08p ]\n",
-          PADDR(FRMEM_MIN), PADDR(FRMEM_MAX) - 1);
-
-    print("\t  Kernel:\n");
-    print("\t\ttext        [ %08p - %08p ]\n",
-          PADDR(_text), PADDR(_etext));
-    print("\t\trodata      [ %08p - %08p ]\n",
-          PADDR(_rodata), PADDR(_erodata));
-    print("\t\tsym table   [ %08p - %08p ]\n",
-          PADDR(_sym_table), PADDR(_esym_table));
-    print("\t\tstab strs   [ %08p - %08p ]\n",
-          PADDR(_stab_strs), PADDR(_estab_strs));
-    print("\t\tdata        [ %08p - %08p ]\n",
-          PADDR(_data), PADDR(_edata));
-    print("\t\tbss         [ %08p - %08p ]\n",
-          PADDR(_bss), PADDR(_ebss));
-    print("\t  Kernel executable footprint: %luKB\n",
-          (PADDR(_end) - (size_t) _start) >> 10);
-
-    return 0;
-}
-
-int
-cmd_timestamp(int argc, char* argv[]) {
-    (void) argc;
-    (void) argv;
-
-    uint64_t low = 0, high = 0;
-    asm volatile (
-        "rdtsc\n"
-        "movl %%eax, %0\n"
-        "movl %%edx, %1\n"
-        : "=r"(low), "=r"(high)
-    );
-    print("%llu\n", (uint64_t) (high << 32) | (low));
-    return 0;
-}
-
-int
+static int
 cmd_ticks(int argc, char* argv[]) {
     (void) argc;
     (void) argv;
@@ -176,7 +78,7 @@ cmd_ticks(int argc, char* argv[]) {
     return 0;
 }
 
-int
+static int
 cmd_reboot(int argc, char* argv[]) {
     (void) argc;
     (void) argv;
@@ -192,13 +94,6 @@ putc(const char c) {
     putc_serial(c);
     // putc_lpt(c);
     putc_cga(c);
-}
-
-void
-puts(const char* text) {
-    size_t i;
-    for (i = 0; i < strlen(text); ++i)
-        putc(text[i]);
 }
 
 char

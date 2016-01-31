@@ -8,9 +8,11 @@ OBJS += $(OBJDIR)/kern/syscall.o
 OBJS += $(OBJDIR)/kern/kmain.o
 
 $(OBJDIR)/kern/%.o: kern/%.S
-	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/kern/%.o: kern/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

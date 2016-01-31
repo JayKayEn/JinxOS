@@ -2,12 +2,14 @@ BINS += $(OBJDIR)/user/hello
 OBJS += $(OBJDIR)/user/hello.o
 
 $(OBJDIR)/user/%.o: user/%.S
-	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/user/%.o: user/%.c
-	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/user/%: $(OBJDIR)/user/%.o $(OBJDIR)/user/user_entry.o $(OBJDIR)/ulib/libu.a user/user.ld
 	@$(LD) -o $@.debug -T user/user.ld $(LDFLAGS) $(OBJDIR)/user/user_entry.o $< -L$(OBJDIR)/ulib -lu $(GCC_LIB) > /dev/null

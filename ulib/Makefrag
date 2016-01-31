@@ -4,9 +4,11 @@ LIBS += $(OBJDIR)/ulib/string.o
 LIBS += $(OBJDIR)/ulib/usermain.o
 
 $(OBJDIR)/ulib/%.o: ulib/%.c
-	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/ulib/libu.a: $(LIBS)
-	@$(AR) r $@ $(LIBS) 2> /dev/null
 	@echo " <+> libu.a"
+	@mkdir -p $(@D)
+	@$(AR) r $@ $(LIBS) 2> /dev/null

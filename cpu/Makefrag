@@ -4,5 +4,6 @@ OBJS += $(OBJDIR)/cpu/mp.o
 OBJS += $(OBJDIR)/cpu/cpuid.o
 
 $(OBJDIR)/cpu/%.o: cpu/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

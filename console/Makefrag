@@ -1,5 +1,6 @@
 OBJS += $(OBJDIR)/console/console.o
 
 $(OBJDIR)/console/%.o: console/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

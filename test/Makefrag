@@ -17,5 +17,6 @@ OBJS += $(OBJDIR)/test/locktest.o
 OBJS += $(OBJDIR)/test/timertest.o
 
 $(OBJDIR)/test/%.o: test/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

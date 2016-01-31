@@ -3,9 +3,11 @@ OBJS += $(OBJDIR)/thread/threadlist.o
 OBJS += $(OBJDIR)/thread/switchframe.o
 
 $(OBJDIR)/thread/%.o: thread/%.S
-	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/thread/%.o: thread/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

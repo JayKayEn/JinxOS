@@ -5,9 +5,11 @@ $(OBJDIR)/boot/boot: $(OBJDIR)/boot/boot.o $(OBJDIR)/boot/bmain.o
 	@echo " <+> boot/boot"
 
 $(OBJDIR)/boot/%.o: boot/%.S
-	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/boot/%.o: boot/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

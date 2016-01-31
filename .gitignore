@@ -3,6 +3,4 @@
 *~
 *.o
 ._*
-
-/.gdbinit
-/obj/*/*
+.gdbinit

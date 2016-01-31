@@ -1,5 +1,6 @@
 OBJS += $(OBJDIR)/debug/debug.o
 
 $(OBJDIR)/debug/%.o: debug/%.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $<"
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<

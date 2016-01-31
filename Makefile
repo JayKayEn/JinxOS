@@ -69,7 +69,7 @@ INCLUDE += -I./proc
 INCLUDE += -I./console
 INCLUDE += -I./test
 
-.PRECIOUS: %.o 				\
+.PRECIOUS:                  \
 	$(OBJDIR)/boot/%.o 		\
 	$(OBJDIR)/kern/%.o 		\
 	$(OBJDIR)/debug/%.o 	\
@@ -133,22 +133,4 @@ backup: clean
 	tar czf ../JinxOS.tar.gz --exclude=obj --exclude=_files .
 
 clean:
-	rm -rf *~ *dSYM
-	rm -rf $(OBJDIR)/kernel
-	rm -rf $(OBJDIR)/kernel.asm
-	rm -rf $(OBJDIR)/jinx
-	rm -rf $(OBJDIR)/boot/*
-	rm -rf $(OBJDIR)/kern/*
-	rm -rf $(OBJDIR)/debug/*
-	rm -rf $(OBJDIR)/mem/*
-	rm -rf $(OBJDIR)/hw/*
-	rm -rf $(OBJDIR)/synch/*
-	rm -rf $(OBJDIR)/klib/*
-	rm -rf $(OBJDIR)/thread/*
-	rm -rf $(OBJDIR)/cpu/*
-	rm -rf $(OBJDIR)/proc/*
-	rm -rf $(OBJDIR)/console/*
-	rm -rf $(OBJDIR)/test/*
-	rm -rf $(OBJDIR)/fs/*
-	rm -rf $(OBJDIR)/ulib/*
-	rm -rf $(OBJDIR)/user/*
+	rm -rf *~ *dSYM $(OBJDIR)

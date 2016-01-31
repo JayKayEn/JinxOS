@@ -4,11 +4,7 @@
 *.o
 ._*
 
+/.gitignore
+/.gitinit.tmpl
 /.gdbinit
-/libgcc.a
-/obj/
-/boot
-/kernel
-/jinx
-/_devtests/
-/tests/
+/obj

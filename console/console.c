@@ -1,8 +1,6 @@
 #include <lib.h>
 
 #include <mboot.h>
-// #include <mmu.h>
-// #include <memlayout.h>
 #include <x86.h>
 #include <console.h>
 #include <cga.h>

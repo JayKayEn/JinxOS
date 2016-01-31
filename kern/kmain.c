@@ -3,8 +3,6 @@
 #include <x86.h>
 #include <spinlock.h>
 #include <mboot.h>
-// #include <mmu.h>
-// #include <memlayout.h>
 #include <console.h>
 #include <gcc.h>
 #include <cga.h>

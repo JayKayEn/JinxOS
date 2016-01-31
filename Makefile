@@ -69,20 +69,20 @@ INCLUDE += -I./proc
 INCLUDE += -I./console
 INCLUDE += -I./test
 
-.PRECIOUS:                  \
-	$(OBJDIR)/boot/%.o 		\
-	$(OBJDIR)/kern/%.o 		\
-	$(OBJDIR)/debug/%.o 	\
-	$(OBJDIR)/mem/%.o 		\
-	$(OBJDIR)/hw/%.o 		\
-	$(OBJDIR)/synch/%.o 	\
-	$(OBJDIR)/klib/%.o 		\
-	$(OBJDIR)/thread/%.o 	\
-	$(OBJDIR)/cpu/%.o 		\
-	$(OBJDIR)/proc/%.o 		\
-	$(OBJDIR)/console/%.o 	\
-	$(OBJDIR)/test/%.o 		\
-	$(OBJDIR)/ulib/%.o 		\
+.PRECIOUS:                 \
+	$(OBJDIR)/boot/%.o     \
+	$(OBJDIR)/kern/%.o     \
+	$(OBJDIR)/debug/%.o    \
+	$(OBJDIR)/mem/%.o      \
+	$(OBJDIR)/hw/%.o       \
+	$(OBJDIR)/synch/%.o    \
+	$(OBJDIR)/klib/%.o     \
+	$(OBJDIR)/thread/%.o   \
+	$(OBJDIR)/cpu/%.o      \
+	$(OBJDIR)/proc/%.o     \
+	$(OBJDIR)/console/%.o  \
+	$(OBJDIR)/test/%.o     \
+	$(OBJDIR)/ulib/%.o     \
 	$(OBJDIR)/user/%.o
 
 CFLAGS += $(INCLUDE)

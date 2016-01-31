@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/debug
-
 OBJS += $(OBJDIR)/debug/debug.o
 
 $(OBJDIR)/debug/%.o: debug/%.c

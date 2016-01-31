@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/hw
-
 OBJS += $(OBJDIR)/hw/acpi.o
 OBJS += $(OBJDIR)/hw/cga.o
 OBJS += $(OBJDIR)/hw/e820.o

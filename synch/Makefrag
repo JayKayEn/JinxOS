@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/synch
-
 OBJS += $(OBJDIR)/synch/cv.o
 OBJS += $(OBJDIR)/synch/lock.o
 OBJS += $(OBJDIR)/synch/semaphore.o

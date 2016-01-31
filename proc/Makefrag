@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/proc
-
 OBJS += $(OBJDIR)/proc/proc.o
 OBJS += $(OBJDIR)/proc/pidreg.o
 

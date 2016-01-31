@@ -1,13 +1,10 @@
 CC := i386-jos-elf-gcc
-CFLAGS := -Wall -Wextra -Werror -m32 -Wno-comment
-CFLAGS += -gstabs
-# CFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-function
-# CFLAGS += -Wno-implicit-function-declaration -Wno-unused-parameter
+CFLAGS := -Wall -Wextra -Werror -m32 -Wno-comment -gstabs
 CFLAGS += -fno-builtin -fno-stack-protector -ffreestanding
 CFLAGS += -nostartfiles -nodefaultlibs -nostdinc -nostdlib
 
 UFLAGS := $(CFLAGS)
-UFLAGS += -DUSER -I./user -I./lib
+UFLAGS += -DUSER -I./user -I./ulib
 
 OBJDIR := obj
 
@@ -19,7 +16,7 @@ AR := i386-jos-elf-ar
 COPY := i386-jos-elf-objcopy
 DUMP := i386-jos-elf-objdump
 
-GCC_LIB := ./lib/libgcc.a
+GCC_LIB := ./klib/libgcc.a
 # GCC_LIB := /usr/lib/gcc/x86_64-linux-gnu/4.8/libgcc.a
 # GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
@@ -36,7 +33,7 @@ QEMUOPTS += -drive file=$(OBJDIR)/jinx,format=raw,if=none,id=kernel
 QEMUOPTS += -device piix4-ide,id=piix4-ide
 QEMUOPTS += -device ide-hd,drive=kernel,bus=piix4-ide.0
 QEMUOPTS += -smp 1
-QEMUOPTS += -soundhw sb16,adlib,pcspk
+# QEMUOPTS += -soundhw sb16,adlib,pcspk
 
 default: $(OBJDIR)/jinx
 
@@ -49,12 +46,13 @@ include debug/Makefrag
 include mem/Makefrag
 include hw/Makefrag
 include synch/Makefrag
-include lib/Makefrag
+include klib/Makefrag
 include thread/Makefrag
 include cpu/Makefrag
 include proc/Makefrag
 include console/Makefrag
 include test/Makefrag
+include ulib/Makefrag
 include user/Makefrag
 
 INCLUDE := -I./include
@@ -64,7 +62,7 @@ INCLUDE += -I./debug
 INCLUDE += -I./mem
 INCLUDE += -I./hw
 INCLUDE += -I./synch
-INCLUDE += -I./lib
+INCLUDE += -I./klib
 INCLUDE += -I./thread
 INCLUDE += -I./cpu
 INCLUDE += -I./proc
@@ -78,12 +76,13 @@ INCLUDE += -I./test
 	$(OBJDIR)/mem/%.o 		\
 	$(OBJDIR)/hw/%.o 		\
 	$(OBJDIR)/synch/%.o 	\
-	$(OBJDIR)/lib/%.o 		\
+	$(OBJDIR)/klib/%.o 		\
 	$(OBJDIR)/thread/%.o 	\
 	$(OBJDIR)/cpu/%.o 		\
 	$(OBJDIR)/proc/%.o 		\
 	$(OBJDIR)/console/%.o 	\
 	$(OBJDIR)/test/%.o 		\
+	$(OBJDIR)/ulib/%.o 		\
 	$(OBJDIR)/user/%.o
 
 CFLAGS += $(INCLUDE)
@@ -144,11 +143,12 @@ clean:
 	rm -rf $(OBJDIR)/mem/*
 	rm -rf $(OBJDIR)/hw/*
 	rm -rf $(OBJDIR)/synch/*
-	rm -rf $(OBJDIR)/lib/*
+	rm -rf $(OBJDIR)/klib/*
 	rm -rf $(OBJDIR)/thread/*
 	rm -rf $(OBJDIR)/cpu/*
 	rm -rf $(OBJDIR)/proc/*
 	rm -rf $(OBJDIR)/console/*
 	rm -rf $(OBJDIR)/test/*
 	rm -rf $(OBJDIR)/fs/*
+	rm -rf $(OBJDIR)/ulib/*
 	rm -rf $(OBJDIR)/user/*

@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/test
-
 OBJS += $(OBJDIR)/test/test.o
 OBJS += $(OBJDIR)/test/arraytest.o
 OBJS += $(OBJDIR)/test/bitmaptest.o

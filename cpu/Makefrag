@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/cpu
-
 OBJS += $(OBJDIR)/cpu/cpu.o
 OBJS += $(OBJDIR)/cpu/ipi.o
 OBJS += $(OBJDIR)/cpu/mp.o

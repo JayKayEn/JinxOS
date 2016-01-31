@@ -1,6 +1,7 @@
-#include <lib.h>
+#include <ulib.h>
 #include <vargs.h>
 #include <syscall.h>
+#include <string.h>
 
 void printfmt(void (*putc)(char), const char* fmt, ...);
 void vprintfmt(void (*putc)(char), const char* fmt, va_list);

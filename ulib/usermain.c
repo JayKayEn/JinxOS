@@ -8,9 +8,6 @@ const char* binaryname = "<unknown>";
 
 void
 usermain(int argc, char** argv) {
-    (void) argc;
-    (void) argv;
-
     // // set thisenv to point at our Env structure in envs[].
     // // LAB 3: Your code here.
     // thisproc = &procs[ENVX(sys_getenvid())];
@@ -22,8 +19,8 @@ usermain(int argc, char** argv) {
     // print("here!\n");
 
     // call user main routine
-    main(argc, argv);
+    int ret = main(argc, argv);
 
     // exit gracefully
-    exit(0);
+    exit(ret);
 }

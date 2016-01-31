@@ -99,7 +99,6 @@ kmain(uint32_t eax, size_t ebx) {
     proc_binary(user_hello);
 
     sti();
-    hlt();
 
     // init_speaker();
 

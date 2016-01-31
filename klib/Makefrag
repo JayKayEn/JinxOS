@@ -1,5 +1,3 @@
-OBJDIRS += $(OBJDIR)/lib
-
 OBJS += $(OBJDIR)/lib/assert.o
 OBJS += $(OBJDIR)/lib/print.o
 OBJS += $(OBJDIR)/lib/snprintf.o

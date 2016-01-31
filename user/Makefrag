@@ -1,28 +1,16 @@
-OBJDIRS += $(OBJDIR)/user
-
 BINS += $(OBJDIR)/user/hello
-
 OBJS += $(OBJDIR)/user/hello.o
 
-LIBS += $(OBJDIR)/user/syscall.o
-LIBS += $(OBJDIR)/user/print.o
-LIBS += $(OBJDIR)/user/string.o
-LIBS += $(OBJDIR)/user/usermain.o
-
 $(OBJDIR)/user/%.o: user/%.S
-	@$(CC) $(UFLAGS) -O3 -c -o $@ $< 2> /dev/null
+	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
 
 $(OBJDIR)/user/%.o: user/%.c
-	@$(CC) $(UFLAGS) -O3 -c -o $@ $< 2> /dev/null
+	@$(CC) $(UFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $<"
 
-$(OBJDIR)/user/%: $(OBJDIR)/user/%.o $(OBJDIR)/user/user_entry.o $(OBJDIR)/user/libu.a user/user.ld
-	@$(LD) -o $@.debug -T user/user.ld $(LDFLAGS) $(OBJDIR)/user/user_entry.o $< -L$(OBJDIR)/user -lu $(GCC_LIB) 2> /dev/null
+$(OBJDIR)/user/%: $(OBJDIR)/user/%.o $(OBJDIR)/user/user_entry.o $(OBJDIR)/ulib/libu.a user/user.ld
+	@$(LD) -o $@.debug -T user/user.ld $(LDFLAGS) $(OBJDIR)/user/user_entry.o $< -L$(OBJDIR)/ulib -lu $(GCC_LIB) > /dev/null
 	@$(DUMP) -S $@.debug > $@.asm
 	@$(COPY) -R .stab -R .stabstr --add-gnu-debuglink=$@.debug $@.debug $@
 	@echo " <+> $<"
-
-$(OBJDIR)/user/libu.a: $(LIBS)
-	@$(AR) r $@ $(LIBS) 2> /dev/null
-	@echo " <+> libu.a"

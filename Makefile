@@ -1,4 +1,4 @@
-PREFIX := 1386-elf-
+PREFIX := i386-elf-
 
 CC := $(PREFIX)gcc
 CFLAGS := -Wall -Wextra -Werror -m32 -Wno-comment -gstabs

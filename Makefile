@@ -1,4 +1,6 @@
-CC := i386-jos-elf-gcc
+PREFIX := 1386-elf-
+
+CC := $(PREFIX)gcc
 CFLAGS := -Wall -Wextra -Werror -m32 -Wno-comment -gstabs
 CFLAGS += -fno-builtin -fno-stack-protector -ffreestanding
 CFLAGS += -nostartfiles -nodefaultlibs -nostdinc -nostdlib
@@ -8,20 +10,20 @@ UFLAGS += -DUSER -I./user -I./ulib
 
 OBJDIR := obj
 
-LD := i386-jos-elf-ld
+LD := $(PREFIX)ld
 LFLAGS := -m elf_i386 -nostdlib
 
-AR := i386-jos-elf-ar
+AR := $(PREFIX)ar
 
-COPY := i386-jos-elf-objcopy
-DUMP := i386-jos-elf-objdump
+COPY := $(PREFIX)objcopy
+DUMP := $(PREFIX)objdump
 
 GCC_LIB := ./klib/libgcc.a
 # GCC_LIB := /usr/lib/gcc/x86_64-linux-gnu/4.8/libgcc.a
 # GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 GDBPORT	:= $(shell expr `id -u` % 1024 + 25000)
-GDB	:= i386-jos-elf-gdb
+GDB	:= $(PREFIX)gdb
 
 CPUS ?= 1
 

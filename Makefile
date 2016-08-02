@@ -71,7 +71,7 @@ INCLUDE += -I./proc
 INCLUDE += -I./console
 INCLUDE += -I./test
 
-.PRECIOUS:                     \
+.PRECIOUS:                 \
 	$(OBJDIR)/boot/%.o     \
 	$(OBJDIR)/kern/%.o     \
 	$(OBJDIR)/debug/%.o    \
@@ -123,12 +123,12 @@ $(OBJDIR)/kernel: $(OBJS) $(BINS)
 	@$(DUMP) -S $@ > $@.asm
 
 $(OBJDIR)/%.o: %.S
-	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 	@echo " <+> $@"
+	@$(CC) $(CFLAGS) -O3 -c -o $@ $< > /dev/null
 
 $(OBJDIR)/%.o: %.c
-	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 	@echo " <+> $@"
+	@$(CC) $(CFLAGS) -Os -c -o $@ $<
 
 backup: clean
 	# git archive --format=tar HEAD | gzip > jinx.tar.gz

@@ -71,7 +71,7 @@ INCLUDE += -I./proc
 INCLUDE += -I./console
 INCLUDE += -I./test
 
-.PRECIOUS:                 \
+.PRECIOUS:                     \
 	$(OBJDIR)/boot/%.o     \
 	$(OBJDIR)/kern/%.o     \
 	$(OBJDIR)/debug/%.o    \
